@@ -1,0 +1,182 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Invoice Preview — Genesis Studio{% endblock %}
+
+{% block main_content %}
+<div class="relative z-10 max-w-4xl mx-auto space-y-8 pb-16">
+    
+    <!-- Header Navigation -->
+    <div class="flex items-center justify-between pb-6 border-b border-white/10">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'reception:ready_cars' %}" data-backtrack="true" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-steel-grey hover:text-pearl transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </a>
+            <div>
+                <h1 class="text-2xl font-display font-extrabold text-pearl tracking-tight">Invoice Preview</h1>
+                <p class="text-steel-grey text-sm mt-1">Review the final bill before dispatching to client.</p>
+            </div>
+        </div>
+
+        <button onclick="window.print()" class="btn-primary text-xs tracking-wider flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            <span>Print / Save PDF</span>
+        </button>
+    </div>
+
+    <!-- INVOICE PAPER -->
+    <div class="bg-white rounded-2xl p-8 sm:p-12 shadow-2xl relative overflow-hidden" id="printable-invoice">
+        
+        <!-- Watermark / Background Texture -->
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 24px 24px;"></div>
+        
+        <!-- Invoice Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start gap-8 border-b border-gray-200 pb-8 relative z-10">
+            <div>
+                <!-- Genesis Dark Logo (for light background) -->
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-gray-900 rounded flex items-center justify-center transform rotate-45 shadow-sm">
+                        <div class="w-4 h-4 border-2 border-[#D4AF37] transform -rotate-45"></div>
+                    </div>
+                    <span class="text-2xl font-display font-black text-gray-900 tracking-tight uppercase">GENESIS<span class="text-gray-400">STUDIO</span></span>
+                </div>
+                <div class="text-gray-500 text-sm font-tech leading-relaxed">
+                    123 Prestige Boulevard<br>
+                    Silicon Valley, CA 94025<br>
+                    billing@genesis-studio.com<br>
+                    +1 (555) 019-9922
+                </div>
+            </div>
+            
+            <div class="text-left sm:text-right">
+                <h2 class="text-4xl font-display font-black text-gray-200 uppercase tracking-tighter mb-4">INVOICE</h2>
+                <div class="grid grid-cols-2 gap-x-8 gap-y-2 text-sm text-gray-600 font-tech text-left sm:text-right">
+                    <span class="font-bold text-gray-900">Invoice No:</span>
+                    <span class="font-mono">#INV-{{ invoice.id|stringformat:"05d" }}</span>
+                    
+                    <span class="font-bold text-gray-900">Date:</span>
+                    <span class="font-mono">{{ invoice.created_at|date:"M d, Y"|default:"Today" }}</span>
+                    
+                    <span class="font-bold text-gray-900">Status:</span>
+                    {% if invoice.is_paid %}
+                        <span class="font-mono font-bold text-green-600">PAID</span>
+                    {% else %}
+                        <span class="font-mono font-bold text-orange-500">PENDING</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing Info -->
+        <div class="flex flex-col sm:flex-row gap-12 py-8 relative z-10">
+            <div class="flex-1">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 font-mono">Billed To</h3>
+                <p class="text-lg font-bold text-gray-900 font-display mb-1">{{ customer.full_name }}</p>
+                <p class="text-gray-600 text-sm font-tech leading-relaxed">
+                    {{ customer.email|default:"No email provided" }}<br>
+                    {{ customer.phone|default:"No phone provided" }}
+                </p>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 font-mono">Vehicle Details</h3>
+                <p class="text-lg font-bold text-gray-900 font-display mb-1">{{ car.year }} {{ car.make }} {{ car.model }}</p>
+                <div class="text-gray-600 text-sm font-tech leading-relaxed grid grid-cols-2 gap-x-4 gap-y-1">
+                    <span>Color:</span><span class="text-gray-900">{{ car.color }}</span>
+                    <span>Plate:</span><span class="text-gray-900 font-mono">{{ car.plate_number }}</span>
+                    <span>Token:</span><span class="text-gray-900 font-mono text-xs uppercase">{{ car.secure_token|truncatechars:12 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Breakdown -->
+        <div class="mt-4 relative z-10">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b-2 border-gray-900 text-gray-900">
+                        <th class="py-3 px-2 font-display font-bold text-sm uppercase tracking-wider">Service Record</th>
+                        <th class="py-3 px-2 font-display font-bold text-sm uppercase tracking-wider text-center">Technician</th>
+                        <th class="py-3 px-2 font-display font-bold text-sm uppercase tracking-wider text-right">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm font-tech text-gray-700 divide-y divide-gray-100">
+                    {% for record in service_records %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="py-4 px-2">
+                            <span class="font-bold text-gray-900 block">{{ record.zone }}</span>
+                            <span class="text-gray-500 text-xs">{{ record.description }}</span>
+                        </td>
+                        <td class="py-4 px-2 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-100 text-gray-600 text-xs font-bold border border-gray-200">
+                                {{ record.performed_by.full_name }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-2 text-right font-mono text-gray-500">{{ record.date|date:"M d" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="py-8 text-center text-gray-400 italic font-mono text-sm">No specific service records logged. (Standard Detailing Package applied)</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals -->
+        <div class="mt-8 border-t-2 border-gray-900 pt-6 flex flex-col items-end relative z-10">
+            <div class="w-full sm:w-1/2 space-y-3">
+                <div class="flex justify-between text-gray-600 text-sm font-tech">
+                    <span>Subtotal</span>
+                    <span>₹{{ invoice.amount }}</span>
+                </div>
+                <div class="flex justify-between text-gray-600 text-sm font-tech pb-3 border-b border-gray-200">
+                    <span>Tax (0% included)</span>
+                    <span>₹0.00</span>
+                </div>
+                <div class="flex justify-between text-gray-900 text-xl font-display font-black pt-1">
+                    <span>TOTAL DUE</span>
+                    <span>₹{{ invoice.amount }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer / Thank You -->
+        <div class="mt-16 pt-8 border-t border-gray-200 text-center relative z-10">
+            <h4 class="font-display font-bold text-gray-900 text-lg mb-2">Thank you for choosing Genesis Studio!</h4>
+            <p class="text-gray-500 text-xs font-tech max-w-lg mx-auto leading-relaxed">
+                We take immense pride in elevating your driving experience. For any inquiries regarding this invoice or your vehicle's care, please contact our support team. Payment is due upon receipt.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Action Bar (Bottom) -->
+    <div class="flex justify-end gap-4 mt-8 print:hidden">
+        <button onclick="window.showStudioToast('Invoice successfully sent to {{ customer.email }}', 'success')" class="btn-primary flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <span>Email to Client</span>
+        </button>
+    </div>
+
+</div>
+
+<!-- Print Styles to ensure beautiful PDF exports -->
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printable-invoice, #printable-invoice * {
+            visibility: visible;
+        }
+        #printable-invoice {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 20px;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }
+    }
+</style>
+{% endblock %}

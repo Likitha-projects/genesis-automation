@@ -1,1 +1,318 @@
-[{"model": "sessions.session", "pk": "5cavgcgj19t3d25cnmlr4zswckzoyspd", "fields": {"session_data": ".eJxVjDsOwyAQBe9CHSF7-RhSpvcZ0MIuwUmEJWNXUe4eIblI2jcz7y0CHnsJR-MtLCSuAsTld4uYnlw7oAfW-yrTWvdtibIr8qRNzivx63a6fwcFW-m10yOAMUlNkFV2Pg-TU96kkSBaAh8jILFxWpFjwzqxt9pbhXlwWbP4fAHOoDfB:1x5L4D:erarcNCZED_waPUArzfAdCFNGXXjxVAlVykMkWt9sMw", "expire_date": "2026-09-26T10:34:41.425Z"}}, {"model": "sessions.session", "pk": "6vec3o1c65u0l8i9l698tzd3aw24m0z9", "fields": {"session_data": ".eJxVjDsOwyAQBe9CHSF7-RhSpvcZ0MIuwUmEJWNXUe4eIblI2jcz7y0CHnsJR-MtLCSuAsTld4uYnlw7oAfW-yrTWvdtibIr8qRNzivx63a6fwcFW-m10yOAMUlNkFV2Pg-TU96kkSBaAh8jILFxWpFjwzqxt9pbhXlwWbP4fAHOoDfB:1x5L41:v14svYg-GcBMnHlAb2yVKzzNw2aRQRpl7R775M9Nq5I", "expire_date": "2026-09-26T10:34:29.488Z"}}, {"model": "sessions.session", "pk": "glat2lbzk103ogfyodkg47z93yjqa7ry", "fields": {"session_data": ".eJxVjDsOwyAQBe9CHSF7-RhSpvcZ0MIuwUmEJWNXUe4eIblI2jcz7y0CHnsJR-MtLCSuAsTld4uYnlw7oAfW-yrTWvdtibIr8qRNzivx63a6fwcFW-m10yOAMUlNkFV2Pg-TU96kkSBaAh8jILFxWpFjwzqxt9pbhXlwWbP4fAHOoDfB:1x5L47:NwZ1v1WQp5VIsgSV2MmpuNufekS4kbIeD3JXjcc40Lk", "expire_date": "2026-09-26T10:34:35.673Z"}}, {"model": "sessions.session", "pk": "rp5dgadq8cs4om83tcl8aw4eqhn87fiz", "fields": {"session_data": ".eJxVjDsOwyAQBe9CHSF7-RhSpvcZ0MIuwUmEJWNXUe4eIblI2jcz7y0CHnsJR-MtLCSuAsTld4uYnlw7oAfW-yrTWvdtibIr8qRNzivx63a6fwcFW-m10yOAMUlNkFV2Pg-TU96kkSBaAh8jILFxWpFjwzqxt9pbhXlwWbP4fAHOoDfB:1x5L4A:Kn1kqvf6-alCuUNDfErTzWz50lfPJcP_qOgy8i58jUI", "expire_date": "2026-09-26T10:34:38.880Z"}}, {"model": "sessions.session", "pk": "t6c51bm2c5b7kn05wyq98z31ofeydlf0", "fields": {"session_data": ".eJxVjDsOwyAQBe9CHSF7-RhSpvcZ0MIuwUmEJWNXUe4eIblI2jcz7y0CHnsJR-MtLCSuAsTld4uYnlw7oAfW-yrTWvdtibIr8qRNzivx63a6fwcFW-m10yOAMUlNkFV2Pg-TU96kkSBaAh8jILFxWpFjwzqxt9pbhXlwWbP4fAHOoDfB:1x5L4K:XWyIJuq9N_lHaIYWu1_NKItX6Cs5-xeakny7hGOsuCE", "expire_date": "2026-09-26T10:34:48.961Z"}}, {"model": "accounts.user", "pk": 1, "fields": {"password": "pbkdf2_sha256$1500000$6LH10SOjIH1HZjTRtg6Slp$m5KcwrrwGecPv/WDol6O2Mw0VHmxdq6DfszakvgQkGY=", "last_login": "2026-09-12T14:57:25.326Z", "is_superuser": true, "username": "admin", "first_name": "", "last_name": "", "email": "admin@genesis.local", "is_staff": true, "is_active": true, "date_joined": "2026-09-12T07:22:17.667Z", "role": "admin", "groups": [], "user_permissions": []}}, {"model": "accounts.user", "pk": 2, "fields": {"password": "pbkdf2_sha256$1500000$3ZIHJ7xuwny76k3VGK1Inw$QY+oLKnTjhKQY3gZs/ho1QXJdGr6/PZ3Ui9PZ+4Qclg=", "last_login": "2026-09-12T15:19:58.133Z", "is_superuser": false, "username": "reception", "first_name": "", "last_name": "", "email": "reception@genesis.local", "is_staff": true, "is_active": true, "date_joined": "2026-09-12T07:22:19.985Z", "role": "receptionist", "groups": [], "user_permissions": []}}, {"model": "garage.customer", "pk": 1, "fields": {"full_name": "James Holden", "phone": "555-0101", "email": "james@example.com"}}, {"model": "garage.customer", "pk": 2, "fields": {"full_name": "Naomi Nagata", "phone": "555-0102", "email": "naomi@example.com"}}, {"model": "garage.customer", "pk": 3, "fields": {"full_name": "Amos Burton", "phone": "555-0103", "email": "amos@example.com"}}, {"model": "garage.customer", "pk": 4, "fields": {"full_name": "Likitha Rani K", "phone": "9731947158", "email": ""}}, {"model": "garage.bay", "pk": 1, "fields": {"name": "Bay 1 - Wash & Prep", "is_active": true}}, {"model": "garage.bay", "pk": 2, "fields": {"name": "Bay 2 - Paint Correction", "is_active": true}}, {"model": "garage.bay", "pk": 3, "fields": {"name": "Bay 3 - Ceramic & Finishing", "is_active": true}}, {"model": "garage.car", "pk": 1, "fields": {"customer": 1, "make": "BMW", "model": "M340i", "year": 2022, "color": "Silver", "plate_number": "RCI-899", "intake_photo": "cars/sedan-before.png", "after_photo": "cars/sedan-after.png", "current_stage": "in_progress", "secure_token": "344f98b1-471c-417a-a211-5ce8bd446c81", "bay": 2, "created_at": "2026-09-12T07:22:21.817Z"}}, {"model": "garage.car", "pk": 2, "fields": {"customer": 2, "make": "Volvo", "model": "XC90", "year": 2020, "color": "White", "plate_number": "BTL-421", "intake_photo": "cars/suv-before.png", "after_photo": "cars/suv-after.png", "current_stage": "intake", "secure_token": "f990261c-9e12-4113-8e55-d0941cf3fe26", "bay": 1, "created_at": "2026-09-12T07:22:21.857Z"}}, {"model": "garage.car", "pk": 3, "fields": {"customer": 3, "make": "Porsche", "model": "911 Carrera", "year": 2023, "color": "Dark Blue", "plate_number": "RCI-777", "intake_photo": "cars/sportscar-before.png", "after_photo": "cars/sportscar-after.png", "current_stage": "ready", "secure_token": "7e37ffb4-ac7a-4ca4-aea1-13ec80c6cc8b", "bay": 3, "created_at": "2026-09-12T07:22:21.887Z"}}, {"model": "garage.car", "pk": 4, "fields": {"customer": 4, "make": "BMW", "model": "modern 14", "year": 2023, "color": "Red", "plate_number": "GEN-999", "intake_photo": "cars/bmw_new_intake.jpg", "after_photo": "", "current_stage": "intake", "secure_token": "03c94e7b-a341-4f44-b48f-4499998ede57", "bay": null, "created_at": "2026-09-12T14:50:47.675Z"}}, {"model": "garage.staff", "pk": 1, "fields": {"full_name": "Marcus Vance", "role": "Lead Technician", "photo": "staff_photos/staff-01.jpg", "is_active": true}}, {"model": "garage.staff", "pk": 2, "fields": {"full_name": "Elena Rostova", "role": "Detailer", "photo": "staff_photos/staff-02.jpg", "is_active": true}}, {"model": "garage.staff", "pk": 3, "fields": {"full_name": "Julian Wright", "role": "Paint Specialist", "photo": "staff_photos/staff-03.jpg", "is_active": true}}, {"model": "garage.staff", "pk": 4, "fields": {"full_name": "Sarah Jenkins", "role": "Detailer", "photo": "staff_photos/staff-04.jpg", "is_active": true}}, {"model": "garage.servicerecord", "pk": 1, "fields": {"car": 1, "zone": "Full exterior", "description": "Initial wash and decontamination", "performed_by": 2, "date": "2026-09-12T07:22:21.828Z"}}, {"model": "garage.servicerecord", "pk": 2, "fields": {"car": 1, "zone": "Hood", "description": "Stage 1 paint correction - removing swirl marks", "performed_by": 3, "date": "2026-09-12T07:22:21.838Z"}}, {"model": "garage.servicerecord", "pk": 3, "fields": {"car": 2, "zone": "Full exterior", "description": "Vehicle received and inspected", "performed_by": 1, "date": "2026-09-12T07:22:21.866Z"}}, {"model": "garage.servicerecord", "pk": 4, "fields": {"car": 3, "zone": "Wheels", "description": "Deep cleaning and ceramic coating on wheels", "performed_by": 4, "date": "2026-09-12T07:22:21.895Z"}}, {"model": "garage.servicerecord", "pk": 5, "fields": {"car": 3, "zone": "Full exterior", "description": "Paint correction and finishing", "performed_by": 3, "date": "2026-09-12T07:22:21.903Z"}}, {"model": "garage.servicerecord", "pk": 6, "fields": {"car": 3, "zone": "Full interior", "description": "Interior detail and leather conditioning", "performed_by": 2, "date": "2026-09-12T07:22:21.911Z"}}]
+[
+    {
+        "model": "sessions.session",
+        "pk": "5cavgcgj19t3d25cnmlr4zswckzoyspd",
+        "fields": {
+            "session_data": ".eJxVjDsOwyAQBe9CHSF7-RhSpvcZ0MIuwUmEJWNXUe4eIblI2jcz7y0CHnsJR-MtLCSuAsTld4uYnlw7oAfW-yrTWvdtibIr8qRNzivx63a6fwcFW-m10yOAMUlNkFV2Pg-TU96kkSBaAh8jILFxWpFjwzqxt9pbhXlwWbP4fAHOoDfB:1x5L4D:erarcNCZED_waPUArzfAdCFNGXXjxVAlVykMkWt9sMw",
+            "expire_date": "2026-09-26T10:34:41.425Z"
+        }
+    },
+    {
+        "model": "sessions.session",
+        "pk": "6vec3o1c65u0l8i9l698tzd3aw24m0z9",
+        "fields": {
+            "session_data": ".eJxVjDsOwyAQBe9CHSF7-RhSpvcZ0MIuwUmEJWNXUe4eIblI2jcz7y0CHnsJR-MtLCSuAsTld4uYnlw7oAfW-yrTWvdtibIr8qRNzivx63a6fwcFW-m10yOAMUlNkFV2Pg-TU96kkSBaAh8jILFxWpFjwzqxt9pbhXlwWbP4fAHOoDfB:1x5L41:v14svYg-GcBMnHlAb2yVKzzNw2aRQRpl7R775M9Nq5I",
+            "expire_date": "2026-09-26T10:34:29.488Z"
+        }
+    },
+    {
+        "model": "sessions.session",
+        "pk": "glat2lbzk103ogfyodkg47z93yjqa7ry",
+        "fields": {
+            "session_data": ".eJxVjDsOwyAQBe9CHSF7-RhSpvcZ0MIuwUmEJWNXUe4eIblI2jcz7y0CHnsJR-MtLCSuAsTld4uYnlw7oAfW-yrTWvdtibIr8qRNzivx63a6fwcFW-m10yOAMUlNkFV2Pg-TU96kkSBaAh8jILFxWpFjwzqxt9pbhXlwWbP4fAHOoDfB:1x5L47:NwZ1v1WQp5VIsgSV2MmpuNufekS4kbIeD3JXjcc40Lk",
+            "expire_date": "2026-09-26T10:34:35.673Z"
+        }
+    },
+    {
+        "model": "sessions.session",
+        "pk": "rp5dgadq8cs4om83tcl8aw4eqhn87fiz",
+        "fields": {
+            "session_data": ".eJxVjDsOwyAQBe9CHSF7-RhSpvcZ0MIuwUmEJWNXUe4eIblI2jcz7y0CHnsJR-MtLCSuAsTld4uYnlw7oAfW-yrTWvdtibIr8qRNzivx63a6fwcFW-m10yOAMUlNkFV2Pg-TU96kkSBaAh8jILFxWpFjwzqxt9pbhXlwWbP4fAHOoDfB:1x5L4A:Kn1kqvf6-alCuUNDfErTzWz50lfPJcP_qOgy8i58jUI",
+            "expire_date": "2026-09-26T10:34:38.880Z"
+        }
+    },
+    {
+        "model": "sessions.session",
+        "pk": "t6c51bm2c5b7kn05wyq98z31ofeydlf0",
+        "fields": {
+            "session_data": ".eJxVjDsOwyAQBe9CHSF7-RhSpvcZ0MIuwUmEJWNXUe4eIblI2jcz7y0CHnsJR-MtLCSuAsTld4uYnlw7oAfW-yrTWvdtibIr8qRNzivx63a6fwcFW-m10yOAMUlNkFV2Pg-TU96kkSBaAh8jILFxWpFjwzqxt9pbhXlwWbP4fAHOoDfB:1x5L4K:XWyIJuq9N_lHaIYWu1_NKItX6Cs5-xeakny7hGOsuCE",
+            "expire_date": "2026-09-26T10:34:48.961Z"
+        }
+    },
+    {
+        "model": "accounts.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$1500000$6LH10SOjIH1HZjTRtg6Slp$m5KcwrrwGecPv/WDol6O2Mw0VHmxdq6DfszakvgQkGY=",
+            "last_login": "2026-09-12T14:57:25.326Z",
+            "is_superuser": true,
+            "username": "admin",
+            "first_name": "",
+            "last_name": "",
+            "email": "admin@genesis.local",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2026-09-12T07:22:17.667Z",
+            "role": "admin",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "accounts.user",
+        "pk": 2,
+        "fields": {
+            "password": "pbkdf2_sha256$1500000$3ZIHJ7xuwny76k3VGK1Inw$QY+oLKnTjhKQY3gZs/ho1QXJdGr6/PZ3Ui9PZ+4Qclg=",
+            "last_login": "2026-09-12T15:19:58.133Z",
+            "is_superuser": false,
+            "username": "reception",
+            "first_name": "",
+            "last_name": "",
+            "email": "reception@genesis.local",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2026-09-12T07:22:19.985Z",
+            "role": "receptionist",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "garage.customer",
+        "pk": 1,
+        "fields": {
+            "full_name": "James Holden",
+            "phone": "555-0101",
+            "email": "james@example.com"
+        }
+    },
+    {
+        "model": "garage.customer",
+        "pk": 2,
+        "fields": {
+            "full_name": "Naomi Nagata",
+            "phone": "555-0102",
+            "email": "naomi@example.com"
+        }
+    },
+    {
+        "model": "garage.customer",
+        "pk": 3,
+        "fields": {
+            "full_name": "Amos Burton",
+            "phone": "555-0103",
+            "email": "amos@example.com"
+        }
+    },
+    {
+        "model": "garage.customer",
+        "pk": 4,
+        "fields": {
+            "full_name": "Likitha Rani K",
+            "phone": "9731947158",
+            "email": ""
+        }
+    },
+    {
+        "model": "garage.bay",
+        "pk": 1,
+        "fields": {
+            "name": "Bay 1 - Wash & Prep",
+            "is_active": true
+        }
+    },
+    {
+        "model": "garage.bay",
+        "pk": 2,
+        "fields": {
+            "name": "Bay 2 - Paint Correction",
+            "is_active": true
+        }
+    },
+    {
+        "model": "garage.bay",
+        "pk": 3,
+        "fields": {
+            "name": "Bay 3 - Ceramic & Finishing",
+            "is_active": true
+        }
+    },
+    {
+        "model": "garage.car",
+        "pk": 1,
+        "fields": {
+            "customer": 1,
+            "make": "BMW",
+            "model": "M340i",
+            "year": 2022,
+            "color": "Silver",
+            "plate_number": "RCI-899",
+            "intake_photo": "cars/sedan-before.png",
+            "after_photo": "cars/sedan-after.png",
+            "current_stage": "in_progress",
+            "secure_token": "344f98b1-471c-417a-a211-5ce8bd446c81",
+            "bay": 2,
+            "created_at": "2026-09-12T07:22:21.817Z"
+        }
+    },
+    {
+        "model": "garage.car",
+        "pk": 2,
+        "fields": {
+            "customer": 2,
+            "make": "Volvo",
+            "model": "XC90",
+            "year": 2020,
+            "color": "White",
+            "plate_number": "BTL-421",
+            "intake_photo": "cars/suv-before.png",
+            "after_photo": "cars/suv-after.png",
+            "current_stage": "intake",
+            "secure_token": "f990261c-9e12-4113-8e55-d0941cf3fe26",
+            "bay": 1,
+            "created_at": "2026-09-12T07:22:21.857Z"
+        }
+    },
+    {
+        "model": "garage.car",
+        "pk": 3,
+        "fields": {
+            "customer": 3,
+            "make": "Porsche",
+            "model": "911 Carrera",
+            "year": 2023,
+            "color": "Dark Blue",
+            "plate_number": "RCI-777",
+            "intake_photo": "cars/sportscar-before.png",
+            "after_photo": "cars/sportscar-after.png",
+            "current_stage": "ready",
+            "secure_token": "7e37ffb4-ac7a-4ca4-aea1-13ec80c6cc8b",
+            "bay": 3,
+            "created_at": "2026-09-12T07:22:21.887Z"
+        }
+    },
+    {
+        "model": "garage.car",
+        "pk": 4,
+        "fields": {
+            "customer": 4,
+            "make": "BMW",
+            "model": "modern 14",
+            "year": 2023,
+            "color": "Red",
+            "plate_number": "GEN-999",
+            "intake_photo": "cars/bmw_new_intake.jpg",
+            "after_photo": "",
+            "current_stage": "intake",
+            "secure_token": "03c94e7b-a341-4f44-b48f-4499998ede57",
+            "bay": null,
+            "created_at": "2026-09-12T14:50:47.675Z"
+        }
+    },
+    {
+        "model": "garage.staff",
+        "pk": 1,
+        "fields": {
+            "full_name": "Marcus Vance",
+            "role": "Lead Technician",
+            "photo": "staff_photos/staff-01.jpg",
+            "is_active": true
+        }
+    },
+    {
+        "model": "garage.staff",
+        "pk": 2,
+        "fields": {
+            "full_name": "Elena Rostova",
+            "role": "Detailer",
+            "photo": "staff_photos/staff-02.jpg",
+            "is_active": true
+        }
+    },
+    {
+        "model": "garage.staff",
+        "pk": 3,
+        "fields": {
+            "full_name": "Julian Wright",
+            "role": "Paint Specialist",
+            "photo": "staff_photos/staff-03.jpg",
+            "is_active": true
+        }
+    },
+    {
+        "model": "garage.staff",
+        "pk": 4,
+        "fields": {
+            "full_name": "Sarah Jenkins",
+            "role": "Detailer",
+            "photo": "staff_photos/staff-04.jpg",
+            "is_active": true
+        }
+    },
+    {
+        "model": "garage.servicerecord",
+        "pk": 1,
+        "fields": {
+            "car": 1,
+            "zone": "Full exterior",
+            "description": "Initial wash and decontamination",
+            "performed_by": 2,
+            "date": "2026-09-12T07:22:21.828Z"
+        }
+    },
+    {
+        "model": "garage.servicerecord",
+        "pk": 2,
+        "fields": {
+            "car": 1,
+            "zone": "Hood",
+            "description": "Stage 1 paint correction - removing swirl marks",
+            "performed_by": 3,
+            "date": "2026-09-12T07:22:21.838Z"
+        }
+    },
+    {
+        "model": "garage.servicerecord",
+        "pk": 3,
+        "fields": {
+            "car": 2,
+            "zone": "Full exterior",
+            "description": "Vehicle received and inspected",
+            "performed_by": 1,
+            "date": "2026-09-12T07:22:21.866Z"
+        }
+    },
+    {
+        "model": "garage.servicerecord",
+        "pk": 4,
+        "fields": {
+            "car": 3,
+            "zone": "Wheels",
+            "description": "Deep cleaning and ceramic coating on wheels",
+            "performed_by": 4,
+            "date": "2026-09-12T07:22:21.895Z"
+        }
+    },
+    {
+        "model": "garage.servicerecord",
+        "pk": 5,
+        "fields": {
+            "car": 3,
+            "zone": "Full exterior",
+            "description": "Paint correction and finishing",
+            "performed_by": 3,
+            "date": "2026-09-12T07:22:21.903Z"
+        }
+    },
+    {
+        "model": "garage.servicerecord",
+        "pk": 6,
+        "fields": {
+            "car": 3,
+            "zone": "Full interior",
+            "description": "Interior detail and leather conditioning",
+            "performed_by": 2,
+            "date": "2026-09-12T07:22:21.911Z"
+        }
+    }
+]

@@ -1,8 +1,5 @@
 // Genesis Automotive Studio - High Octane Nitro Boost Loader & Page Transitions
 (function() {
-    // Check if user prefers reduced motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
 
     // Create Nitro Overlay Elements
     function createNitroLoader() {

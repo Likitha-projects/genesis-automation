@@ -80,4 +80,4 @@ class Invoice(models.Model):
     is_paid = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Invoice for {self.car} - ${self.amount}"
+        return f"Invoice for {self.car} - ₹{self.amount}"

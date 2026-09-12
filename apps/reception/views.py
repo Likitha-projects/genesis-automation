@@ -102,9 +102,9 @@ def ready_cars(request):
             invoice = invoice_form.save(commit=False)
             invoice.car = car
             invoice.save()
-            # Simulate sending email
-            messages.success(request, f"Invoice for ${invoice.amount} successfully generated and emailed to {car.customer.email}.")
-            return redirect('reception:ready_cars')
+            # Redirect to the new beautiful invoice preview page
+            messages.success(request, f"Invoice for ₹{invoice.amount} successfully generated.")
+            return redirect('reception:invoice_preview', invoice_id=invoice.id)
     else:
         invoice_form = InvoiceForm()
 
@@ -113,3 +113,32 @@ def ready_cars(request):
         'invoice_form': invoice_form,
     }
     return render(request, 'reception/ready_cars.html', context)
+
+@login_required
+def delete_car(request, car_id):
+    if not (request.user.is_superuser or request.user.role == 'admin'):
+        messages.error(request, "You do not have permission to delete vehicles.")
+        return redirect('reception:home')
+        
+    car = get_object_or_404(Car, id=car_id)
+    
+    if request.method == 'POST':
+        car_plate = car.plate_number
+        car.delete()
+        messages.success(request, f"Vehicle {car_plate} has been permanently deleted.")
+        return redirect('reception:home')
+        
+    return redirect('reception:car_detail', car_id=car.id)
+
+@login_required
+def invoice_preview(request, invoice_id):
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+    # The Invoice model has a FK to Car, which has a FK to Customer
+    # We will pass the invoice to the template to render
+    context = {
+        'invoice': invoice,
+        'car': invoice.car,
+        'customer': invoice.car.customer,
+        'service_records': invoice.car.service_records.all()
+    }
+    return render(request, 'reception/invoice_preview.html', context)
