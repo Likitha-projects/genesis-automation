@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from apps.garage.models import Car, Bay, ServiceRecord
-from .forms import CustomerForm, CarForm, ServiceRecordForm
+from apps.garage.models import Car, Bay, ServiceRecord, Invoice
+from .forms import CustomerForm, CarForm, ServiceRecordForm, InvoiceForm
 
 @login_required
 def home(request):
@@ -89,3 +89,27 @@ def car_detail(request, car_id):
         'stage_choices': Car.STAGE_CHOICES,
     }
     return render(request, 'reception/car_detail.html', context)
+
+@login_required
+def ready_cars(request):
+    cars = Car.objects.filter(current_stage='ready').order_by('-created_at')
+    
+    if request.method == 'POST':
+        car_id = request.POST.get('car_id')
+        car = get_object_or_404(Car, id=car_id)
+        invoice_form = InvoiceForm(request.POST)
+        if invoice_form.is_valid():
+            invoice = invoice_form.save(commit=False)
+            invoice.car = car
+            invoice.save()
+            # Simulate sending email
+            messages.success(request, f"Invoice for ${invoice.amount} successfully generated and emailed to {car.customer.email}.")
+            return redirect('reception:ready_cars')
+    else:
+        invoice_form = InvoiceForm()
+
+    context = {
+        'cars': cars,
+        'invoice_form': invoice_form,
+    }
+    return render(request, 'reception/ready_cars.html', context)

@@ -115,6 +115,24 @@
 
     <!-- Global Backtracking Handler -->
     <script>
+        // Backtrack or Fallback Helper
+        window.backtrackOrFallback = function(fallbackUrl) {
+            if (window.triggerNitroBoost) {
+                window.triggerNitroBoost(fallbackUrl || null, () => {
+                    if (window.history.length > 1 && document.referrer) {
+                        window.history.back();
+                    } else {
+                        window.location.href = fallbackUrl || '/';
+                    }
+                });
+            } else {
+                if (window.history.length > 1 && document.referrer) {
+                    window.history.back();
+                } else {
+                    window.location.href = fallbackUrl || '/';
+                }
+            }
+        };
 
         // Global Backtracking Handler (Supports data-backtrack="true")
         document.addEventListener('DOMContentLoaded', () => {

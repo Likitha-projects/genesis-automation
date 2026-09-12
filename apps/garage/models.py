@@ -71,3 +71,13 @@ class ServiceRecord(models.Model):
 
     def __str__(self):
         return f"{self.car} - {self.zone} on {self.date.strftime('%Y-%m-%d')}"
+
+class Invoice(models.Model):
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='invoices')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    details = models.TextField()
+    date_generated = models.DateTimeField(auto_now_add=True)
+    is_paid = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Invoice for {self.car} - ${self.amount}"

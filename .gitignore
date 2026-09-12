@@ -131,3 +131,10 @@ test_*.html
 test_*.png
 dom_output.html
 dom_passport.html
+
+# ------------------------------------------
+# Sensitive Data & Environment
+# ------------------------------------------
+.env
+db.sqlite3
+media/

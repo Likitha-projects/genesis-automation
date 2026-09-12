@@ -29,7 +29,7 @@ def car_passport(request, token):
     last_service = history.first()
     last_serviced_date = last_service.date if last_service else car.created_at
     total_services_count = history.count()
-    service_location = f"Bay {car.bay.name}" if car.bay else "Genesis Main Studio, Bay Alpha"
+    service_location = f"Bay {car.bay.name}" if car.bay else "Unassigned"
 
     # Synthesize parts changed/installed from service records or studio defaults
     parts_list = []
@@ -53,12 +53,7 @@ def car_passport(request, token):
 
     # Default fallback parts if none are logged yet
     if not parts_list:
-        parts_list = [
-            {"name": "Genesis 9H Nano-Ceramic Armor", "category": "Surface Shield", "zone": "Full Exterior"},
-            {"name": "Forged Carbon Splitter Assembly", "category": "Aerodynamics", "zone": "Front Aero"},
-            {"name": "Brembo Heat-Shield Ceramic Sealant", "category": "Brake System", "zone": "Wheels & Calipers"},
-            {"name": "Stealth Tint Hydrophobic Glass Coat", "category": "Optics", "zone": "Full Glass"},
-        ]
+        pass # No parts for new intakes
             
     context = {
         'car': car,
@@ -67,7 +62,7 @@ def car_passport(request, token):
         'total_zones': len(zone_counts),
         'masked_plate': masked_plate,
         'last_serviced_date': last_serviced_date,
-        'total_services_count': total_services_count if total_services_count > 0 else 3,
+        'total_services_count': total_services_count,
         'service_location': service_location,
         'parts_list': parts_list,
         'parts_count': len(parts_list),

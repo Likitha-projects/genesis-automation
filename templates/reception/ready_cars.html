@@ -1,0 +1,147 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Ready & Delivered Cars — Genesis Reception{% endblock %}
+
+{% block main_content %}
+<div class="relative z-10 max-w-7xl mx-auto space-y-8 pb-12">
+    
+    <!-- Hero Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/10">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="w-2 h-2 rounded-full bg-ignition-gold animate-pulse"></span>
+                <span class="text-xs font-mono text-ignition-gold tracking-widest uppercase font-bold">READY FOR DELIVERY</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-display font-extrabold text-pearl tracking-tight">
+                Ready & Delivered Cars
+            </h1>
+            <p class="text-steel-grey text-sm mt-1">
+                Manage cars that are ready for pickup and generate customer invoices.
+            </p>
+        </div>
+    </div>
+
+    <!-- Active Cars Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {% for car in cars %}
+        <div class="glass-panel rounded-2xl border border-white/10 hover:border-ignition-gold/50 transition-all duration-300 overflow-hidden flex flex-col group shadow-xl p-5">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-xl font-display font-bold text-pearl">{{ car.make }} {{ car.model }}</h3>
+                    <p class="text-sm font-mono text-steel-grey">{{ car.plate_number }} • {{ car.color }}</p>
+                </div>
+                <div class="px-3 py-1 rounded-full bg-[#10B981]/10 border border-[#10B981]/30 text-xs font-bold text-[#10B981]">
+                    READY
+                </div>
+            </div>
+            
+            <div class="text-sm text-steel-grey mb-6">
+                Customer: <span class="text-pearl">{{ car.customer.full_name }}</span><br>
+                Email: <span class="text-pearl">{{ car.customer.email }}</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-auto border-t border-white/10 pt-4 flex flex-col gap-4">
+                <!-- Transformation Modal Trigger -->
+                <button onclick="openTransformationModal('{{ car.id }}')" class="w-full py-2.5 rounded-lg border border-ignition-gold/50 hover:bg-ignition-gold/10 text-ignition-gold font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    View Transformation
+                </button>
+
+                <h4 class="text-sm font-bold text-ignition-gold mb-1">Generate & Send Invoice</h4>
+                <form method="post" action="{% url 'reception:ready_cars' %}" class="space-y-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="car_id" value="{{ car.id }}">
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-steel-grey mb-1">Invoice Amount ($)</label>
+                        {{ invoice_form.amount }}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-steel-grey mb-1">Service Details</label>
+                        {{ invoice_form.details }}
+                    </div>
+                    
+                    <button type="submit" class="w-full py-2.5 rounded-lg bg-ignition-gold hover:bg-ignition-gold-light text-obsidian font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        Email Invoice to Client
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Modal (Hidden by default) -->
+            <div id="modal-{{ car.id }}" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm">
+                <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-obsidian border border-white/10 rounded-2xl shadow-2xl flex flex-col" onclick="event.stopPropagation()">
+                    <div class="p-4 border-b border-white/10 flex justify-between items-center bg-[#0F1116] sticky top-0 z-10">
+                        <h3 class="font-display font-bold text-pearl text-lg">{{ car.make }} {{ car.model }} - Transformation</h3>
+                        <button onclick="closeTransformationModal('{{ car.id }}')" class="p-2 rounded-lg text-steel-grey hover:text-white bg-white/5 hover:bg-white/10 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-mono font-bold text-steel-grey uppercase tracking-widest">Intake</span>
+                                <div class="w-full aspect-[4/3] rounded-xl overflow-hidden bg-[#14171F] border border-white/5">
+                                    {% if car.intake_photo %}
+                                        <img src="{{ car.intake_photo.url }}" class="w-full h-full object-cover" alt="Before">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center text-steel-grey/50 font-mono text-sm">No Intake Photo</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-mono font-bold text-ignition-gold uppercase tracking-widest">After</span>
+                                <div class="w-full aspect-[4/3] rounded-xl overflow-hidden bg-[#14171F] border border-ignition-gold/30">
+                                    {% if car.after_photo %}
+                                        <img src="{{ car.after_photo.url }}" class="w-full h-full object-cover" alt="After">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center text-steel-grey/50 font-mono text-sm">No After Photo</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        {% empty %}
+        <div class="col-span-full py-12 text-center text-steel-grey glass-panel rounded-2xl border border-white/10">
+            No cars are currently ready for pickup.
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+    function openTransformationModal(id) {
+        const modal = document.getElementById('modal-' + id);
+        if(modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    function closeTransformationModal(id) {
+        const modal = document.getElementById('modal-' + id);
+        if(modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', (e) => {
+        if(e.target.id && e.target.id.startsWith('modal-')) {
+            const id = e.target.id.replace('modal-', '');
+            closeTransformationModal(id);
+        }
+    });
+</script>
+{% endblock %}

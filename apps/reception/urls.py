@@ -7,4 +7,5 @@ urlpatterns = [
     path('intake/', views.intake, name='intake'),
     path('intake/success/<uuid:token>/', views.intake_success, name='intake_success'),
     path('car/<int:car_id>/', views.car_detail, name='car_detail'),
+    path('ready-cars/', views.ready_cars, name='ready_cars'),
 ]

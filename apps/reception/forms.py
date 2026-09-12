@@ -1,5 +1,5 @@
 from django import forms
-from apps.garage.models import Customer, Car, ServiceRecord
+from apps.garage.models import Customer, Car, ServiceRecord, Invoice
 
 class CustomerForm(forms.ModelForm):
     email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={'class': 'w-full bg-showroom-white text-graphite-black placeholder-steel-grey/50 border border-chrome-silver rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-ignition-gold/50 focus:border-ignition-gold focus:outline-none transition-all shadow-sm', 'placeholder': 'jane@example.com'}))
@@ -33,4 +33,13 @@ class ServiceRecordForm(forms.ModelForm):
             'zone': forms.Select(attrs={'class': 'w-full bg-showroom-white text-graphite-black border border-chrome-silver rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-ignition-gold/50 focus:border-ignition-gold focus:outline-none transition-all shadow-sm'}),
             'description': forms.Textarea(attrs={'class': 'w-full bg-showroom-white text-graphite-black placeholder-steel-grey/50 border border-chrome-silver rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-ignition-gold/50 focus:border-ignition-gold focus:outline-none transition-all shadow-sm', 'rows': 3, 'placeholder': 'Describe the service performed...'}),
             'performed_by': forms.Select(attrs={'class': 'w-full bg-showroom-white text-graphite-black border border-chrome-silver rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-ignition-gold/50 focus:border-ignition-gold focus:outline-none transition-all shadow-sm'}),
+        }
+
+class InvoiceForm(forms.ModelForm):
+    class Meta:
+        model = Invoice
+        fields = ['amount', 'details']
+        widgets = {
+            'amount': forms.NumberInput(attrs={'class': 'w-full bg-showroom-white text-graphite-black border border-chrome-silver rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-ignition-gold/50 focus:border-ignition-gold focus:outline-none transition-all shadow-sm', 'step': '0.01'}),
+            'details': forms.Textarea(attrs={'class': 'w-full bg-showroom-white text-graphite-black placeholder-steel-grey/50 border border-chrome-silver rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-ignition-gold/50 focus:border-ignition-gold focus:outline-none transition-all shadow-sm', 'rows': 4, 'placeholder': 'Itemized services...'}),
         }
