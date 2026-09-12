@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
+import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,6 +28,7 @@ SECRET_KEY = 'django-insecure-g5lv5!ps*ek&mt96i8zojj6oyigfe^!#)c4y#(1z=!awfg@%4^
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app', 'http://localhost', 'http://127.0.0.1']
 
 
 # Application definition
@@ -85,6 +88,14 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Use Vercel Postgres if DATABASE_URL is available
+if os.environ.get('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.parse(
+        os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 
 
 # Password validation
