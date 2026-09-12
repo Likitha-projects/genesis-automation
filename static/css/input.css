@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-obsidian text-pearl antialiased font-sans selection:bg-ignition-gold/30 selection:text-ignition-gold;
+        overflow-x: hidden;
+    }
+    .panel {
+        @apply bg-obsidian-card/90 border border-white/10 shadow-card-dark rounded-xl backdrop-blur-md;
+    }
+    .panel-elevated {
+        @apply bg-obsidian-elevated/90 border border-white/15 shadow-card-dark rounded-xl backdrop-blur-md;
+    }
+    .btn-primary {
+        @apply relative inline-flex items-center justify-center font-display font-bold py-2.5 px-6 rounded-lg bg-gradient-to-r from-ignition-gold via-ignition-gold-light to-ignition-gold text-obsidian shadow-[0_4px_18px_rgba(212,175,55,0.35)] hover:shadow-[0_6px_25px_rgba(212,175,55,0.55)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300;
+    }
+    .btn-secondary {
+        @apply relative inline-flex items-center justify-center font-display font-bold py-2.5 px-6 rounded-lg bg-white/5 hover:bg-white/10 text-pearl border border-white/15 shadow-sm hover:border-ignition-gold/50 transition-all duration-300;
+    }
+    .btn-nitro {
+        @apply relative inline-flex items-center justify-center font-display font-bold py-2.5 px-6 rounded-lg bg-gradient-to-r from-nitro-cyan to-blue-500 text-obsidian shadow-[0_4px_20px_rgba(0,240,255,0.4)] hover:shadow-[0_6px_30px_rgba(0,240,255,0.6)] hover:-translate-y-0.5 transition-all duration-300;
+    }
+    .font-display {
+        font-family: 'Cabinet Grotesk', 'Syne', sans-serif;
+    }
+    .font-tech {
+        font-family: 'Orbitron', 'JetBrains Mono', monospace;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #08090B;
+}
+::-webkit-scrollbar-thumb {
+    background: #252A34;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #D4AF37;
+}
+
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes nitroStreak {
+    0% { transform: translateX(-100%) scaleX(0.2); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateX(200%) scaleX(1.5); opacity: 0; }
+}
+
+.nitro-streak {
+    animation: nitroStreak 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+

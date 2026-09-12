@@ -1,0 +1,16 @@
+{
+  "name": "genesis-automation",
+  "version": "1.0.0",
+  "description": "An MVP web platform for a premium car detailing studio featuring a reception intake tool, a simple admin dashboard, and a digital 3D car passport for clients.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
+  }
+}

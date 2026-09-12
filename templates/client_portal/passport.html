@@ -1,0 +1,651 @@
+{% extends "base.html" %}
+
+{% block title %}Digital Passport — {{ car.make }} {{ car.model }} | Genesis Automation{% endblock %}
+
+{% block body_class %}bg-obsidian text-slate-100 font-sans antialiased selection:bg-ignition-gold selection:text-obsidian overflow-x-hidden{% endblock %}
+
+{% block extra_head %}
+<!-- Three.js Engine & OrbitControls -->
+<script src="/static/vendor/three.min.js"></script>
+<script src="/static/vendor/OrbitControls.js"></script>
+<script src="/static/js/car-viewer.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize 3D car viewer for customer passport
+        function startPassport3D() {
+            const container = document.getElementById('passport-3d-car-container');
+            if (!container) return;
+
+            if (typeof window.initCarViewer !== 'function') {
+                console.warn('[3D Studio] initCarViewer not loaded yet, retrying in 100ms...');
+                setTimeout(startPassport3D, 100);
+                return;
+            }
+
+            window.initCarViewer('passport-3d-car-container', {
+                initialColor: 0xD4AF37, // Gold default
+                autoRotate: true,
+                allowControls: true,
+                showControls: true,
+                showUnderglow: true,
+                showHeadlights: true,
+                cameraDistance: 5.6
+            });
+        }
+
+        startPassport3D();
+
+        // Color selector buttons for customer
+        const colorBtns = document.querySelectorAll('.passport-color-btn');
+        colorBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const hex = btn.getAttribute('data-color');
+                colorBtns.forEach(b => b.classList.remove('ring-2', 'ring-ignition-gold', 'scale-110'));
+                btn.classList.add('ring-2', 'ring-ignition-gold', 'scale-110');
+                if (window.changeCarColor) {
+                    window.changeCarColor(hex);
+                }
+            });
+        });
+
+        // Toggle wireframe button
+        const wireframeBtn = document.getElementById('passport-wireframe-toggle');
+        if (wireframeBtn) {
+            wireframeBtn.addEventListener('click', () => {
+                if (window.toggleWireframe) {
+                    const isWire = window.toggleWireframe();
+                    wireframeBtn.classList.toggle('text-nitro-cyan', isWire);
+                    wireframeBtn.classList.toggle('border-nitro-cyan', isWire);
+                }
+            });
+        }
+
+        // Live Stage Polling
+        setInterval(() => {
+            fetch('/car/api/{{ car.secure_token }}/status/')
+                .then(response => response.json())
+                .then(data => {
+                    const stageBadge = document.getElementById('current-stage-tracker');
+                    if (stageBadge && stageBadge.dataset.stage !== data.current_stage) {
+                        window.location.reload();
+                    }
+                })
+                .catch(err => console.error('Error polling status:', err));
+        }, 15000);
+
+        // Before/After Slider Logic
+        const container = document.getElementById('ba-slider-container');
+        const beforeImg = document.getElementById('ba-before-image');
+        const handle = document.getElementById('ba-handle');
+        const innerImg = document.getElementById('ba-before-img-inner');
+        
+        if (container && beforeImg && handle && innerImg) {
+            let isDown = false;
+
+            const updateInnerImg = () => {
+                innerImg.style.width = `${container.offsetWidth}px`;
+            };
+            window.addEventListener('resize', updateInnerImg);
+            updateInnerImg();
+
+            const updateSlider = (x) => {
+                const rect = container.getBoundingClientRect();
+                let position = x - rect.left;
+                position = Math.max(0, Math.min(position, rect.width));
+                const percentage = (position / rect.width) * 100;
+                beforeImg.style.width = `${percentage}%`;
+                handle.style.left = `${percentage}%`;
+            };
+
+            const onMove = (e) => {
+                if (!isDown) return;
+                const x = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+                updateSlider(x);
+            };
+
+            container.addEventListener('mousedown', (e) => {
+                isDown = true;
+                updateSlider(e.pageX);
+            });
+            container.addEventListener('touchstart', (e) => {
+                isDown = true;
+                updateSlider(e.touches[0].clientX);
+            }, {passive: true});
+
+            window.addEventListener('mouseup', () => isDown = false);
+            window.addEventListener('touchend', () => isDown = false);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove, {passive: true});
+        }
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-obsidian text-slate-100 flex flex-col">
+    <!-- Top Backtracking / Navigation Bar -->
+    <header class="sticky top-0 z-40 bg-obsidian/90 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <!-- Universal Backtrack Button -->
+            <button onclick="window.backtrackOrFallback('/')" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-mono font-medium text-slate-300 hover:text-white transition-all group cursor-pointer">
+                <svg class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5 text-ignition-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                <span>Back to Studio</span>
+            </button>
+
+            <div class="h-4 w-px bg-white/10 hidden sm:block"></div>
+
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-signal-emerald animate-pulse"></span>
+                <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Live Passport Telemetry</span>
+            </div>
+        </div>
+
+        <!-- Studio Brand Logo -->
+        <a href="/" class="flex items-center gap-2 font-display text-base font-black tracking-wider text-white hover:opacity-80 transition-opacity">
+            <span class="w-2.5 h-2.5 rounded-full bg-ignition-gold shadow-[0_0_10px_#D4AF37]"></span>
+            <span>GENESIS<span class="text-ignition-gold">.</span></span>
+        </a>
+
+        <!-- Action / Share Pill -->
+        <div class="flex items-center gap-3">
+            <div class="hidden md:flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full font-mono text-xs text-slate-300">
+                <span class="text-ignition-gold">TOKEN:</span>
+                <span>{{ car.secure_token|stringformat:".8s" }}...</span>
+            </div>
+            <button onclick="navigator.clipboard.writeText(window.location.href); alert('Passport URL copied to clipboard');" class="p-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-ignition-gold hover:border-ignition-gold/50 transition-colors cursor-pointer" title="Copy Passport Link">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- 1. HERO CENTRIC 3D CAR OBJECT & VEHICLE OVERVIEW -->
+        <section class="relative rounded-3xl border border-white/10 bg-gradient-to-b from-carbon to-obsidian overflow-hidden shadow-2xl">
+            <!-- Studio Stage Ambient Glow -->
+            <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-ignition-gold/10 rounded-full blur-[120px]"></div>
+                <div class="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-obsidian via-obsidian/60 to-transparent"></div>
+            </div>
+
+            <!-- Top Header Inside Hero: Vehicle Name & Plate -->
+            <div class="relative z-10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5">
+                <div>
+                    <div class="flex items-center gap-3 mb-1">
+                        <span class="px-2.5 py-0.5 rounded-full bg-ignition-gold/10 text-ignition-gold border border-ignition-gold/30 text-[10px] font-mono uppercase tracking-widest font-semibold">
+                            Authenticated Digital Twin
+                        </span>
+                        <span class="text-xs font-mono text-slate-500">{{ car.year }} Edition</span>
+                    </div>
+                    <h1 class="text-3xl sm:text-5xl font-display font-black tracking-tight text-white uppercase">
+                        {{ car.make }} <span class="text-transparent bg-clip-text bg-gradient-to-r from-ignition-gold to-white">{{ car.model }}</span>
+                    </h1>
+                </div>
+
+                <!-- Plate & Live Status Pill -->
+                <div class="flex items-center gap-3">
+                    <div class="px-4 py-2 rounded-xl bg-black/60 border border-white/15 font-mono text-center shadow-inner">
+                        <div class="text-[9px] uppercase tracking-widest text-slate-400">Masked Plate</div>
+                        <div class="text-base font-bold text-white tracking-widest">{{ masked_plate }}</div>
+                    </div>
+                    <div class="px-4 py-2 rounded-xl border font-mono text-center shadow-inner
+                        {% if car.current_stage == 'ready' %}
+                            bg-signal-emerald/10 border-signal-emerald/30 text-signal-emerald
+                        {% elif car.current_stage == 'in_progress' %}
+                            bg-nitro-cyan/10 border-nitro-cyan/30 text-nitro-cyan
+                        {% elif car.current_stage == 'quality_check' %}
+                            bg-ignition-gold/10 border-ignition-gold/30 text-ignition-gold
+                        {% else %}
+                            bg-white/5 border-white/10 text-slate-300
+                        {% endif %}
+                    ">
+                        <div class="text-[9px] uppercase tracking-widest opacity-80">Stage</div>
+                        <div class="text-sm font-bold uppercase tracking-wider">{{ car.get_current_stage_display }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive 3D Canvas Visualizer -->
+            <div class="relative w-full h-[450px] sm:h-[520px] cursor-grab active:cursor-grabbing">
+                <div id="passport-3d-car-container" class="w-full h-full"></div>
+
+                <!-- Floating 3D Controls Over Canvas -->
+                <div class="absolute bottom-6 left-6 right-6 flex flex-wrap items-center justify-between gap-4 pointer-events-none">
+                    <!-- Color Swatches -->
+                    <div class="pointer-events-auto flex items-center gap-2 p-2 rounded-2xl bg-black/70 backdrop-blur-md border border-white/10 shadow-lg">
+                        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest pl-2 pr-1 hidden sm:inline">Paint:</span>
+                        <button data-color="0xD4AF37" class="passport-color-btn w-6 h-6 rounded-full bg-[#D4AF37] ring-2 ring-ignition-gold scale-110 shadow-sm transition-all cursor-pointer" title="Ignition Gold"></button>
+                        <button data-color="0x111111" class="passport-color-btn w-6 h-6 rounded-full bg-[#111111] hover:scale-105 border border-white/20 transition-all cursor-pointer" title="Obsidian Stealth"></button>
+                        <button data-color="0x00F0FF" class="passport-color-btn w-6 h-6 rounded-full bg-[#00F0FF] hover:scale-105 transition-all cursor-pointer" title="Nitro Cyan"></button>
+                        <button data-color="0xFF2A6D" class="passport-color-btn w-6 h-6 rounded-full bg-[#FF2A6D] hover:scale-105 transition-all cursor-pointer" title="Apex Crimson"></button>
+                        <button data-color="0xE5E7EB" class="passport-color-btn w-6 h-6 rounded-full bg-[#E5E7EB] hover:scale-105 transition-all cursor-pointer" title="Liquid Silver"></button>
+                    </div>
+
+                    <!-- 3D Hints & Wireframe -->
+                    <div class="pointer-events-auto flex items-center gap-2">
+                        <button id="passport-wireframe-toggle" class="px-3 py-1.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/15 text-xs font-mono text-slate-300 hover:text-white transition-all flex items-center gap-1.5 shadow-lg cursor-pointer" title="Toggle Wireframe CAD View">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                            <span>CAD Wireframe</span>
+                        </button>
+                        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/15 text-[11px] font-mono text-slate-400">
+                            <svg class="w-3.5 h-3.5 text-ignition-gold animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+                            <span>Drag 360° · Scroll to Zoom</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Specs Bar Below 3D View -->
+            <div class="relative z-10 border-t border-white/10 bg-black/40 backdrop-blur-sm grid grid-cols-2 md:grid-cols-4 divide-x divide-white/5">
+                <div class="p-4 sm:p-5 text-center">
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 block mb-1">Make & Model</span>
+                    <span class="text-sm sm:text-base font-bold text-white font-mono">{{ car.make }} {{ car.model }}</span>
+                </div>
+                <div class="p-4 sm:p-5 text-center">
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 block mb-1">Color / Finish</span>
+                    <span class="text-sm sm:text-base font-bold text-white font-mono">{{ car.color|default:"Bespoke Finish" }}</span>
+                </div>
+                <div class="p-4 sm:p-5 text-center">
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 block mb-1">Production Year</span>
+                    <span class="text-sm sm:text-base font-bold text-white font-mono">{{ car.year }}</span>
+                </div>
+                <div class="p-4 sm:p-5 text-center">
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 block mb-1">Assigned Studio Bay</span>
+                    <span class="text-sm sm:text-base font-bold text-ignition-gold font-mono">{{ service_location }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. LUXURY DIGITAL PASSPORT METRICS CARDS -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-display font-black text-white tracking-wide uppercase">
+                        Digital Passport <span class="text-ignition-gold">Telemetry</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 font-mono">Immutable genesis ledger data & studio maintenance logs</p>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-ignition-gold/10 border border-ignition-gold/30 text-ignition-gold text-xs font-mono font-bold">
+                    VERIFIED VIN
+                </span>
+            </div>
+
+            <!-- 4 Key Digital Passport Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Card 1: Last Serviced Date -->
+                <div class="relative rounded-2xl border border-white/10 bg-gradient-to-br from-carbon to-obsidian p-6 shadow-xl overflow-hidden group hover:border-ignition-gold/40 transition-all">
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-ignition-gold/5 rounded-full blur-2xl group-hover:bg-ignition-gold/15 transition-all"></div>
+                    <div class="w-10 h-10 rounded-xl bg-ignition-gold/10 border border-ignition-gold/20 flex items-center justify-center text-ignition-gold mb-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
+                    <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">Last Serviced Date</div>
+                    <div class="text-2xl font-display font-black text-white group-hover:text-ignition-gold transition-colors">
+                        {{ last_serviced_date|date:"M d, Y" }}
+                    </div>
+                    <div class="mt-2 text-xs font-mono text-slate-500">
+                        {{ last_serviced_date|date:"H:i" }} UTC · Verified Pass
+                    </div>
+                </div>
+
+                <!-- Card 2: Total Service Count -->
+                <div class="relative rounded-2xl border border-white/10 bg-gradient-to-br from-carbon to-obsidian p-6 shadow-xl overflow-hidden group hover:border-nitro-cyan/40 transition-all">
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-nitro-cyan/5 rounded-full blur-2xl group-hover:bg-nitro-cyan/15 transition-all"></div>
+                    <div class="w-10 h-10 rounded-xl bg-nitro-cyan/10 border border-nitro-cyan/20 flex items-center justify-center text-nitro-cyan mb-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                    </div>
+                    <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">Service Count</div>
+                    <div class="text-2xl font-display font-black text-white group-hover:text-nitro-cyan transition-colors">
+                        {{ total_services_count }} <span class="text-sm font-normal text-slate-400">Milestones</span>
+                    </div>
+                    <div class="mt-2 text-xs font-mono text-slate-500">
+                        {{ total_zones }} Distinct Zones Logged
+                    </div>
+                </div>
+
+                <!-- Card 3: Studio Location / Assigned Bay -->
+                <div class="relative rounded-2xl border border-white/10 bg-gradient-to-br from-carbon to-obsidian p-6 shadow-xl overflow-hidden group hover:border-signal-emerald/40 transition-all">
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-signal-emerald/5 rounded-full blur-2xl group-hover:bg-signal-emerald/15 transition-all"></div>
+                    <div class="w-10 h-10 rounded-xl bg-signal-emerald/10 border border-signal-emerald/20 flex items-center justify-center text-signal-emerald mb-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">Service Facility</div>
+                    <div class="text-xl font-display font-black text-white group-hover:text-signal-emerald transition-colors truncate">
+                        {{ service_location }}
+                    </div>
+                    <div class="mt-2 text-xs font-mono text-slate-500">
+                        Genesis Precision HQ, Bay Zone
+                    </div>
+                </div>
+
+                <!-- Card 4: Parts Changed & Installed Count -->
+                <div class="relative rounded-2xl border border-white/10 bg-gradient-to-br from-carbon to-obsidian p-6 shadow-xl overflow-hidden group hover:border-amber-400/40 transition-all">
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-amber-400/5 rounded-full blur-2xl group-hover:bg-amber-400/15 transition-all"></div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-amber-400 mb-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <div class="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">Parts & Upgrades</div>
+                    <div class="text-2xl font-display font-black text-white group-hover:text-amber-400 transition-colors">
+                        {{ parts_count }} <span class="text-sm font-normal text-slate-400">Upgrades</span>
+                    </div>
+                    <div class="mt-2 text-xs font-mono text-slate-500">
+                        Performance & Protective Spec
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. PARTS CHANGED & SERVICE BREAKDOWN LIST -->
+        <section class="rounded-3xl border border-white/10 bg-gradient-to-b from-carbon to-obsidian p-6 sm:p-8 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+                <div>
+                    <h3 class="text-lg sm:text-xl font-display font-bold text-white uppercase tracking-wide">
+                        Installed Performance Components & Treatments
+                    </h3>
+                    <p class="text-xs font-mono text-slate-400 mt-0.5">Catalog of verified parts and bespoke chemical armor applied</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-slate-300">
+                        Total Items: <span class="text-ignition-gold font-bold">{{ parts_count }}</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Parts Grid List -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                {% for part in parts_list %}
+                <div class="flex items-start justify-between p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-ignition-gold/30 transition-all group">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-ignition-gold group-hover:border-ignition-gold/40 transition-colors mt-0.5">
+                            <span class="text-xs font-mono font-bold">{{ forloop.counter }}</span>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-ignition-gold transition-colors">{{ part.name }}</h4>
+                            <p class="text-xs font-mono text-slate-400 mt-0.5">Zone: <span class="text-slate-300">{{ part.zone }}</span></p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[10px] font-mono uppercase tracking-wider text-slate-300 whitespace-nowrap">
+                        {{ part.category }}
+                    </span>
+                </div>
+                {% empty %}
+                <div class="col-span-2 p-8 text-center text-slate-500 font-mono text-sm">
+                    No parts record available yet.
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 4. TWO-COLUMN SECTION: CONDITION COMPARISON SLIDER & LIVE VIEW / TRACKER -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left: Interactive Before / After Slider (7 cols) -->
+            <div class="lg:col-span-7 rounded-3xl border border-white/10 bg-gradient-to-b from-carbon to-obsidian p-6 sm:p-8 shadow-xl flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between pb-6 border-b border-white/10">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-2 h-2 rounded-full bg-ignition-gold animate-ping"></span>
+                                <span class="text-[10px] font-mono text-ignition-gold uppercase tracking-widest font-bold">Studio Verification</span>
+                            </div>
+                            <h3 class="text-xl font-display font-bold text-white uppercase tracking-wide">
+                                Condition Comparison Slider
+                            </h3>
+                            <p class="text-xs font-mono text-slate-400 mt-0.5">Drag horizontal cursor to compare intake condition vs. finished ceramic finish</p>
+                        </div>
+                        <div class="hidden sm:flex items-center gap-2">
+                            <span class="px-2.5 py-1 rounded bg-black/60 border border-white/10 font-mono text-[10px] text-slate-400 uppercase">Intake</span>
+                            <span class="text-slate-600 font-mono text-xs">/</span>
+                            <span class="px-2.5 py-1 rounded bg-ignition-gold/20 border border-ignition-gold/40 font-mono text-[10px] text-ignition-gold uppercase font-bold">Delivery</span>
+                        </div>
+                    </div>
+
+                    <!-- Slider Frame -->
+                    <div class="relative w-full aspect-[16/10] bg-black rounded-2xl overflow-hidden select-none cursor-ew-resize border border-white/10 shadow-2xl mt-6 group" id="ba-slider-container">
+                        <!-- After Image (Background) -->
+                        <div class="absolute inset-0 w-full h-full flex items-center justify-center bg-obsidian">
+                            {% if car.after_photo %}
+                            <img src="{{ car.after_photo.url }}" class="w-full h-full object-cover pointer-events-none" alt="After Studio Detail">
+                            {% elif car.intake_photo %}
+                            <img src="{{ car.intake_photo.url }}" class="w-full h-full object-cover pointer-events-none" alt="After Studio Detail">
+                            {% else %}
+                            <img src="/static/images/ai-generated/cars/sportscar-after.png" class="w-full h-full object-cover pointer-events-none" alt="After Studio Detail" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%25\' height=\'100%25\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%2308090B\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'sans-serif\' font-size=\'24\' fill=\'%23D4AF37\' font-weight=\'bold\'%3EGENESIS STUDIO FINISH (AFTER)%3C/text%3E%3C/svg%3E'">
+                            {% endif %}
+                            
+                            <!-- After Floating Tag -->
+                            <div class="absolute top-4 right-4 z-10 px-3 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-ignition-gold/40 font-mono text-xs text-ignition-gold font-bold shadow-lg">
+                                AFTER FINISH
+                            </div>
+                        </div>
+                        
+                        <!-- Before Image (Clipped Left Layer) -->
+                        <div id="ba-before-image" class="absolute inset-0 h-full overflow-hidden border-r-2 border-ignition-gold shadow-[0_0_20px_rgba(212,175,55,0.4)]" style="width: 50%;">
+                            <div class="absolute inset-0 h-full bg-obsidian flex items-center justify-center" id="ba-before-img-inner">
+                                {% if car.intake_photo %}
+                                <img src="{{ car.intake_photo.url }}" class="w-full h-full object-cover pointer-events-none filter contrast-90 brightness-90" alt="Before Studio Intake">
+                                {% else %}
+                                <img src="/static/images/ai-generated/cars/sportscar-before.png" class="w-full h-full object-cover pointer-events-none filter contrast-90 brightness-90" alt="Before Studio Intake" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%25\' height=\'100%25\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%2316181D\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'sans-serif\' font-size=\'24\' fill=\'%2394A3B8\' font-weight=\'bold\'%3EINTAKE CONDITION (BEFORE)%3C/text%3E%3C/svg%3E'">
+                                {% endif %}
+
+                                <!-- Before Floating Tag -->
+                                <div class="absolute top-4 left-4 z-10 px-3 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-white/20 font-mono text-xs text-slate-300 font-bold shadow-lg">
+                                    BEFORE INTAKE
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Slider Center Draggable Divider -->
+                        <div id="ba-handle" class="absolute inset-y-0 left-1/2 w-0.5 bg-ignition-gold shadow-[0_0_15px_#D4AF37] flex items-center justify-center -ml-0.5 pointer-events-none" style="left: 50%;">
+                            <div class="w-9 h-9 rounded-full bg-obsidian border-2 border-ignition-gold shadow-[0_0_15px_rgba(212,175,55,0.6)] flex items-center justify-center">
+                                <svg class="w-4 h-4 text-ignition-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 9l-3 3 3 3m8-6l3 3-3 3"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between text-xs font-mono text-slate-400">
+                    <span>Double-side inspection snapshot</span>
+                    <span class="text-ignition-gold">100% Hand-Crafted Finish</span>
+                </div>
+            </div>
+
+            <!-- Right: Studio Live View & Stage Tracker (5 cols) -->
+            <div class="lg:col-span-5 space-y-8">
+                
+                <!-- Live View Placeholder Card (Coming Soon) -->
+                <div class="rounded-3xl border border-white/10 bg-gradient-to-b from-carbon to-obsidian p-6 shadow-xl relative overflow-hidden group">
+                    <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-nitro-cyan animate-pulse"></span>
+                            <h3 class="text-base font-display font-bold text-white uppercase tracking-wider">
+                                Studio Live Cam
+                            </h3>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full bg-nitro-cyan/10 border border-nitro-cyan/30 text-nitro-cyan text-[10px] font-mono font-bold uppercase tracking-widest">
+                            Coming Soon
+                        </span>
+                    </div>
+
+                    <!-- Video Feed Placeholder -->
+                    <div class="relative aspect-video rounded-2xl bg-black border border-white/10 overflow-hidden mt-4 group">
+                        <div class="absolute inset-0 bg-[url('/static/images/ai-generated/bays/bay-wide.png')] bg-cover bg-center opacity-30 grayscale group-hover:opacity-40 transition-opacity"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent"></div>
+
+                        <!-- Scanlines Effect -->
+                        <div class="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent2px,rgba(0,0,0,0.5)_2px,rgba(0,0,0,0.5)_4px)] pointer-events-none opacity-50"></div>
+
+                        <!-- Center Play / Camera Icon -->
+                        <div class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                            <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/20 backdrop-blur-md flex items-center justify-center text-ignition-gold mb-3 shadow-2xl group-hover:scale-105 group-hover:border-ignition-gold/50 transition-all">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </div>
+                            <span class="text-xs font-mono uppercase tracking-widest text-white font-bold">{{ service_location }}</span>
+                            <span class="text-[11px] font-mono text-slate-400 mt-1">4K Ultra HD Bay Stream Link Encrypting</span>
+                        </div>
+
+                        <!-- Live Telemetry Pill Overlay -->
+                        <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[10px] font-mono text-slate-400 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/10">
+                            <span class="text-nitro-cyan">FEED: OFFLINE</span>
+                            <span>ENC: AES-256-GCM</span>
+                        </div>
+                    </div>
+
+                    <p class="text-xs font-mono text-slate-400 mt-4 leading-relaxed">
+                        High-definition bay monitoring cameras with encrypted customer access are being deployed across all active detailing bays.
+                    </p>
+                </div>
+
+                <!-- Stage Tracker Progress -->
+                <div class="rounded-3xl border border-white/10 bg-gradient-to-b from-carbon to-obsidian p-6 shadow-xl" id="current-stage-tracker" data-stage="{{ car.current_stage }}">
+                    <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                        <h3 class="text-base font-display font-bold text-white uppercase tracking-wider">
+                            Studio Workflow Status
+                        </h3>
+                        <span class="text-xs font-mono text-ignition-gold font-bold">STAGE PROGRESS</span>
+                    </div>
+
+                    <div class="mt-6 space-y-4">
+                        <!-- Stage 1: Intake -->
+                        <div class="flex items-center gap-4 p-3 rounded-xl border {% if car.current_stage == 'intake' %}border-ignition-gold bg-ignition-gold/5{% else %}border-white/5 bg-white/[0.02]{% endif %}">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-mono text-xs font-bold
+                                {% if car.current_stage == 'intake' %}
+                                    bg-ignition-gold text-obsidian shadow-[0_0_10px_#D4AF37]
+                                {% elif car.current_stage == 'in_progress' or car.current_stage == 'quality_check' or car.current_stage == 'ready' %}
+                                    bg-signal-emerald text-white
+                                {% else %}
+                                    bg-white/10 text-slate-400
+                                {% endif %}
+                            ">
+                                {% if car.current_stage != 'intake' %}✓{% else %}01{% endif %}
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold {% if car.current_stage == 'intake' %}text-ignition-gold{% else %}text-white{% endif %}">Intake & Assessment</h4>
+                                <p class="text-[11px] font-mono text-slate-400">VIN inspection, defect mapping, surface wash</p>
+                            </div>
+                        </div>
+
+                        <!-- Stage 2: In Progress -->
+                        <div class="flex items-center gap-4 p-3 rounded-xl border {% if car.current_stage == 'in_progress' %}border-ignition-gold bg-ignition-gold/5{% else %}border-white/5 bg-white/[0.02]{% endif %}">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-mono text-xs font-bold
+                                {% if car.current_stage == 'in_progress' %}
+                                    bg-ignition-gold text-obsidian shadow-[0_0_10px_#D4AF37]
+                                {% elif car.current_stage == 'quality_check' or car.current_stage == 'ready' %}
+                                    bg-signal-emerald text-white
+                                {% else %}
+                                    bg-white/10 text-slate-400
+                                {% endif %}
+                            ">
+                                {% if car.current_stage == 'quality_check' or car.current_stage == 'ready' %}✓{% else %}02{% endif %}
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold {% if car.current_stage == 'in_progress' %}text-ignition-gold{% else %}text-white{% endif %}">In Progress</h4>
+                                <p class="text-[11px] font-mono text-slate-400">Paint correction, PPF wrap, ceramic application</p>
+                            </div>
+                        </div>
+
+                        <!-- Stage 3: Quality Check -->
+                        <div class="flex items-center gap-4 p-3 rounded-xl border {% if car.current_stage == 'quality_check' %}border-ignition-gold bg-ignition-gold/5{% else %}border-white/5 bg-white/[0.02]{% endif %}">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-mono text-xs font-bold
+                                {% if car.current_stage == 'quality_check' %}
+                                    bg-ignition-gold text-obsidian shadow-[0_0_10px_#D4AF37]
+                                {% elif car.current_stage == 'ready' %}
+                                    bg-signal-emerald text-white
+                                {% else %}
+                                    bg-white/10 text-slate-400
+                                {% endif %}
+                            ">
+                                {% if car.current_stage == 'ready' %}✓{% else %}03{% endif %}
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold {% if car.current_stage == 'quality_check' %}text-ignition-gold{% else %}text-white{% endif %}">Quality Inspection</h4>
+                                <p class="text-[11px] font-mono text-slate-400">Dual LED gloss audit, infrared curing</p>
+                            </div>
+                        </div>
+
+                        <!-- Stage 4: Ready for Delivery -->
+                        <div class="flex items-center gap-4 p-3 rounded-xl border {% if car.current_stage == 'ready' %}border-signal-emerald bg-signal-emerald/10{% else %}border-white/5 bg-white/[0.02]{% endif %}">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center font-mono text-xs font-bold
+                                {% if car.current_stage == 'ready' %}
+                                    bg-signal-emerald text-white shadow-[0_0_12px_rgba(16,185,129,0.5)]
+                                {% else %}
+                                    bg-white/10 text-slate-400
+                                {% endif %}
+                            ">
+                                {% if car.current_stage == 'ready' %}★{% else %}04{% endif %}
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold {% if car.current_stage == 'ready' %}text-signal-emerald{% else %}text-white{% endif %}">Ready for Handover</h4>
+                                <p class="text-[11px] font-mono text-slate-400">Final certification, studio delivery bay release</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 5. CHRONOLOGICAL SERVICE HISTORY LOG -->
+        <section class="rounded-3xl border border-white/10 bg-gradient-to-b from-carbon to-obsidian p-6 sm:p-8 shadow-xl">
+            <div class="flex items-center justify-between pb-6 border-b border-white/10">
+                <div>
+                    <h3 class="text-lg sm:text-xl font-display font-bold text-white uppercase tracking-wide">
+                        Chronological Studio Activity Log
+                    </h3>
+                    <p class="text-xs font-mono text-slate-400 mt-0.5">Every action performed on this vehicle recorded in real-time</p>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-slate-300">
+                    {{ history.count }} Entries
+                </span>
+            </div>
+
+            <div class="mt-6 space-y-4">
+                {% for record in history %}
+                <div class="p-4 rounded-2xl border border-white/5 bg-white/[0.02] flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white/20 transition-all">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-ignition-gold/10 border border-ignition-gold/30 flex items-center justify-center text-ignition-gold font-mono font-bold text-sm shrink-0">
+                            {{ forloop.counter }}
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-white text-base">{{ record.zone }}</span>
+                                <span class="text-xs font-mono text-slate-500">·</span>
+                                <span class="text-xs font-mono text-ignition-gold">{{ record.performed_by.full_name|default:"Genesis Master Detailer" }}</span>
+                            </div>
+                            <p class="text-xs text-slate-300 mt-1 leading-relaxed">{{ record.description }}</p>
+                        </div>
+                    </div>
+                    <div class="font-mono text-xs text-slate-400 shrink-0 text-left sm:text-right bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
+                        {{ record.date|date:"M d, Y · H:i" }}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-8 rounded-2xl border border-white/5 text-center font-mono text-slate-400 text-sm">
+                    No service log records found for this vehicle.
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer with Nitro Backtracking -->
+    <footer class="border-t border-white/10 bg-obsidian py-8 px-6 mt-12 text-center">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-ignition-gold"></span>
+                <span class="text-xs font-mono uppercase tracking-widest text-slate-400">Genesis Digital Passport System · Ver 2.4</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="window.backtrackOrFallback('/')" class="text-xs font-mono text-ignition-gold hover:underline cursor-pointer">
+                    Back to Studio Home
+                </button>
+                <span class="text-slate-600">·</span>
+                <a href="{% url 'accounts:login' %}" class="text-xs font-mono text-slate-400 hover:text-white">
+                    Staff Cockpit
+                </a>
+            </div>
+        </div>
+    </footer>
+</div>
+{% endblock %}

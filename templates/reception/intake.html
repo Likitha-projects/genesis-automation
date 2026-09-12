@@ -1,0 +1,127 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}New Vehicle Intake — Genesis Reception{% endblock %}
+
+{% block main_content %}
+<div class="max-w-4xl mx-auto relative z-10 space-y-8 pb-16">
+    
+    <!-- Top Header & Backtracking -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="w-2 h-2 rounded-full bg-ignition-gold animate-pulse"></span>
+                <span class="text-xs font-mono text-ignition-gold tracking-widest uppercase font-bold">CLIENT INTAKE PROTOCOL</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-display font-extrabold text-pearl tracking-tight">
+                New Vehicle Intake
+            </h1>
+            <p class="text-steel-grey text-sm mt-1">
+                Register customer identity, record vehicle technical specs, and generate their private digital passport.
+            </p>
+        </div>
+
+        <a href="{% url 'reception:home' %}" data-backtrack="true" class="btn-secondary text-xs font-tech tracking-wider self-start sm:self-auto flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <span>Back to Active Cars</span>
+        </a>
+    </div>
+
+    <!-- Intake Form -->
+    <form method="post" enctype="multipart/form-data" class="space-y-8">
+        {% csrf_token %}
+        
+        <!-- STEP 1: CUSTOMER IDENTITY CARD -->
+        <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <span class="w-7 h-7 rounded-lg bg-ignition-gold/20 text-ignition-gold border border-ignition-gold/30 flex items-center justify-center font-display font-bold text-xs">
+                        01
+                    </span>
+                    <h2 class="font-display font-bold text-xl text-pearl">Customer Basic Details</h2>
+                </div>
+                <span class="text-[11px] font-mono text-steel-grey uppercase">Identity & Notification</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for field in customer_form %}
+                <div class="{% if field.name == 'email' %}md:col-span-2{% endif %} space-y-2">
+                    <label class="block text-xs font-mono font-bold text-steel-grey uppercase tracking-wider">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="text-ignition-gold">*</span>
+                        {% else %}
+                            <span class="text-[10px] text-steel-grey/60 font-normal lowercase">(optional for digital passport alerts)</span>
+                        {% endif %}
+                    </label>
+                    <div class="relative">
+                        {{ field }}
+                    </div>
+                    {% if field.errors %}
+                    <p class="text-signal-crimson text-xs font-mono mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- STEP 2: VEHICLE TECHNICAL SPECIFICATIONS -->
+        <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <span class="w-7 h-7 rounded-lg bg-nitro-cyan/20 text-nitro-cyan border border-nitro-cyan/30 flex items-center justify-center font-display font-bold text-xs">
+                        02
+                    </span>
+                    <h2 class="font-display font-bold text-xl text-pearl">Vehicle Details & Intake Media</h2>
+                </div>
+                <span class="text-[11px] font-mono text-steel-grey uppercase">Chassis & Condition Baseline</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for field in car_form %}
+                <div class="{% if field.name == 'intake_photo' %}md:col-span-2{% endif %} space-y-2">
+                    <label class="block text-xs font-mono font-bold text-steel-grey uppercase tracking-wider">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="text-nitro-cyan">*</span>{% endif %}
+                    </label>
+                    <div class="relative">
+                        {{ field }}
+                    </div>
+                    {% if field.help_text %}
+                    <p class="text-steel-grey text-xs font-mono mt-1">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% if field.errors %}
+                    <p class="text-signal-crimson text-xs font-mono mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Form Submission Footer -->
+        <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
+            <a href="{% url 'reception:home' %}" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-steel-grey hover:text-pearl text-center transition-all">
+                Cancel
+            </a>
+            <button type="submit" class="w-full sm:w-auto btn-primary flex items-center justify-center gap-2 text-xs font-tech tracking-wider py-3.5 px-8">
+                <span>Complete Intake & Issue Passport</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Ensure form controls match dark cockpit aesthetics */
+    input[type="text"], input[type="email"], input[type="number"], select, textarea {
+        background-color: #14171F !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: #F4F5F7 !important;
+    }
+    input[type="text"]:focus, input[type="email"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+        border-color: #D4AF37 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 1px #D4AF37 !important;
+    }
+</style>
+{% endblock %}
+

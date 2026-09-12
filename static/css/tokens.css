@@ -1,0 +1,19 @@
+:root {
+  --obsidian: #08090B;
+  --obsidian-card: #0F1116;
+  --obsidian-elevated: #161922;
+  --graphite: #1A1D24;
+  --graphite-light: #252A34;
+  --platinum: #C9CDD3;
+  --pearl: #F4F5F7;
+  --ignition-gold: #D4AF37;
+  --ignition-gold-light: #F3C642;
+  --ignition-gold-glow: rgba(212, 175, 55, 0.4);
+  --nitro-cyan: #00F0FF;
+  --nitro-cyan-glow: rgba(0, 240, 255, 0.5);
+  --signal-emerald: #10B981;
+  --signal-amber: #F59E0B;
+  --signal-crimson: #EF4444;
+  --chrome-silver: #E2E8F0;
+  --steel-grey: #94A3B8;
+}

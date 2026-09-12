@@ -1,0 +1,664 @@
+{% extends "base.html" %}
+
+{% block title %}Genesis Automation — Bespoke Automotive Modification & Detailing Studio{% endblock %}
+
+{% block body_class %}bg-obsidian text-pearl selection:bg-ignition-gold/30 selection:text-ignition-gold{% endblock %}
+
+{% block extra_head %}
+<!-- Three.js Engine & OrbitControls -->
+<script src="/static/vendor/three.min.js"></script>
+<script src="/static/vendor/OrbitControls.js"></script>
+<script src="/static/js/car-viewer.js"></script>
+
+<script>
+    function start3D() {
+        const container = document.getElementById('hero-3d-car-container');
+        if (!container) return;
+
+        if (typeof window.initCarViewer !== 'function') {
+            console.warn('[3D Studio] initCarViewer not loaded yet, retrying...');
+            setTimeout(start3D, 100);
+            return;
+        }
+
+        const viewer = window.initCarViewer('hero-3d-car-container', {
+            carColor: '#D4AF37',
+            autoRotate: true,
+            allowControls: true,
+            showUnderglow: true,
+            showHeadlights: true,
+            cameraDistance: 6.0
+        });
+
+        if (viewer) {
+            // Interactive Color Swatches
+            document.querySelectorAll('[data-car-color]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const color = btn.getAttribute('data-car-color');
+                    viewer.setColor(color);
+                    document.querySelectorAll('[data-car-color]').forEach(b => b.classList.remove('ring-2', 'ring-white', 'scale-110'));
+                    btn.classList.add('ring-2', 'ring-white', 'scale-110');
+                });
+            });
+
+            // Wireframe toggle
+            const wireframeBtn = document.getElementById('toggle-wireframe');
+            let wireframeActive = false;
+            if (wireframeBtn) {
+                wireframeBtn.addEventListener('click', () => {
+                    wireframeActive = !wireframeActive;
+                    viewer.toggleWireframe(wireframeActive);
+                    wireframeBtn.classList.toggle('text-ignition-gold', wireframeActive);
+                    wireframeBtn.classList.toggle('border-ignition-gold', wireframeActive);
+                });
+            }
+
+            // Headlights toggle
+            const lightsBtn = document.getElementById('toggle-headlights');
+            let lightsActive = true;
+            if (lightsBtn) {
+                lightsBtn.addEventListener('click', () => {
+                    lightsActive = !lightsActive;
+                    viewer.toggleHeadlights(lightsActive);
+                    lightsBtn.classList.toggle('text-nitro-cyan', lightsActive);
+                    lightsBtn.classList.toggle('border-nitro-cyan', lightsActive);
+                });
+            }
+
+            // Underglow toggle
+            const underglowBtn = document.getElementById('toggle-underglow');
+            let underglowActive = true;
+            if (underglowBtn) {
+                underglowBtn.addEventListener('click', () => {
+                    underglowActive = !underglowActive;
+                    viewer.toggleUnderglow(underglowActive);
+                    underglowBtn.classList.toggle('text-nitro-cyan', underglowActive);
+                    underglowBtn.classList.toggle('border-nitro-cyan', underglowActive);
+                });
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start3D);
+    } else {
+        start3D();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // GSAP Scroll Animations
+        if (typeof gsap !== 'undefined') {
+            gsap.registerPlugin(ScrollTrigger);
+
+            gsap.from('.hero-anim', {
+                y: 35,
+                opacity: 0,
+                duration: 0.9,
+                stagger: 0.12,
+                ease: 'power3.out'
+            });
+
+            gsap.utils.toArray('.service-card').forEach((card, i) => {
+                gsap.from(card, {
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 85%',
+                    },
+                    y: 40,
+                    opacity: 0,
+                    duration: 0.7,
+                    delay: (i % 2) * 0.1,
+                    ease: 'power2.out'
+                });
+            });
+
+            gsap.utils.toArray('.stat-counter').forEach(el => {
+                const target = parseInt(el.getAttribute('data-target') || '0', 10);
+                if (target > 0) {
+                    gsap.fromTo(el, { textContent: 0 }, {
+                        scrollTrigger: { trigger: el, start: 'top 90%' },
+                        textContent: target,
+                        duration: 1.6,
+                        ease: 'power1.inOut',
+                        snap: { textContent: 1 }
+                    });
+                }
+            });
+        }
+
+        // Interactive Before / After Slider
+        const baContainer = document.getElementById('landing-ba-container');
+        const baBefore = document.getElementById('landing-ba-before');
+        const baHandle = document.getElementById('landing-ba-handle');
+        const baInner = document.getElementById('landing-ba-inner');
+
+        if (baContainer && baBefore && baHandle && baInner) {
+            let isDragging = false;
+            const updateInner = () => {
+                baInner.style.width = `${baContainer.offsetWidth}px`;
+            };
+            window.addEventListener('resize', updateInner);
+            updateInner();
+
+            const moveSlider = (clientX) => {
+                const rect = baContainer.getBoundingClientRect();
+                let x = clientX - rect.left;
+                x = Math.max(0, Math.min(x, rect.width));
+                const pct = (x / rect.width) * 100;
+                baBefore.style.width = `${pct}%`;
+                baHandle.style.left = `${pct}%`;
+            };
+
+            baContainer.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                moveSlider(e.clientX);
+            });
+            window.addEventListener('mouseup', () => isDragging = false);
+            window.addEventListener('mousemove', (e) => {
+                if (isDragging) moveSlider(e.clientX);
+            });
+
+            baContainer.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                moveSlider(e.touches[0].clientX);
+            }, { passive: true });
+            window.addEventListener('touchend', () => isDragging = false);
+            window.addEventListener('touchmove', (e) => {
+                if (isDragging) moveSlider(e.touches[0].clientX);
+            }, { passive: true });
+        }
+
+        // Mobile Navigation Drawer Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileDrawer = document.getElementById('mobile-drawer');
+        const closeMobileDrawer = document.getElementById('close-mobile-drawer');
+
+        if (mobileMenuBtn && mobileDrawer) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileDrawer.classList.remove('translate-x-full');
+            });
+        }
+        if (closeMobileDrawer && mobileDrawer) {
+            closeMobileDrawer.addEventListener('click', () => {
+                mobileDrawer.classList.add('translate-x-full');
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header Navigation -->
+<header class="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-white/10 transition-all duration-300">
+    <div class="container mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-3.5 group">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E5C358] via-ignition-gold to-[#8B6D1E] p-0.5 shadow-[0_0_20px_rgba(212,175,55,0.35)] group-hover:shadow-[0_0_25px_rgba(212,175,55,0.55)] transition-all">
+                <div class="w-full h-full bg-[#08090B] rounded-[10px] flex items-center justify-center">
+                    <svg class="w-5 h-5 text-ignition-gold group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+            </div>
+            <div>
+                <span class="font-display font-black text-xl tracking-[0.18em] text-pearl group-hover:text-ignition-gold transition-colors">GENESIS</span>
+                <span class="block text-[9px] font-sans font-semibold text-steel-grey tracking-[0.22em] uppercase -mt-0.5">Automotive Studio</span>
+            </div>
+        </a>
+
+        <!-- Desktop Nav Links -->
+        <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-steel-grey">
+            <a href="#services" class="hover:text-ignition-gold transition-colors">Services</a>
+            <a href="#customizer" class="hover:text-ignition-gold transition-colors">3D Studio</a>
+            <a href="#transformation" class="hover:text-ignition-gold transition-colors">Craftsmanship</a>
+            <a href="#bays" class="hover:text-ignition-gold transition-colors">Studio Bays</a>
+        </nav>
+
+        <!-- Right CTA / Login Switcher Button -->
+        <div class="hidden sm:flex items-center gap-4">
+            <a href="{% url 'accounts:login' %}" class="btn-primary flex items-center gap-2 group text-sm">
+                <span>Client & Staff Portal</span>
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
+        </div>
+
+        <!-- Mobile Hamburger Button -->
+        <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-lg bg-white/5 border border-white/10 text-pearl hover:text-ignition-gold">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
+</header>
+
+<!-- Mobile Navigation Drawer -->
+<div id="mobile-drawer" class="fixed inset-y-0 right-0 z-[60] w-72 bg-obsidian-card border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-300 lg:hidden shadow-2xl">
+    <div>
+        <div class="flex items-center justify-between pb-6 border-b border-white/10 mb-8">
+            <div class="font-display font-bold text-lg text-pearl">GENESIS<span class="text-ignition-gold">.</span></div>
+            <button id="close-mobile-drawer" class="p-2 text-steel-grey hover:text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <nav class="flex flex-col gap-4 text-base font-semibold">
+            <a href="#services" class="text-steel-grey hover:text-ignition-gold py-2 border-b border-white/5">Studio Services</a>
+            <a href="#customizer" class="text-steel-grey hover:text-ignition-gold py-2 border-b border-white/5">3D Studio</a>
+            <a href="#transformation" class="text-steel-grey hover:text-ignition-gold py-2 border-b border-white/5">Craftsmanship</a>
+            <a href="#bays" class="text-steel-grey hover:text-ignition-gold py-2 border-b border-white/5">Studio Bays</a>
+        </nav>
+    </div>
+    <div class="pt-6 border-t border-white/10 flex flex-col gap-3">
+        <a href="{% url 'accounts:login' %}" class="btn-primary w-full text-center">
+            Client & Staff Portal
+        </a>
+    </div>
+</div>
+
+<!-- HERO SECTION WITH 3D CAR OBJECT -->
+<section id="customizer" class="relative min-h-screen pt-28 pb-20 flex flex-col justify-center overflow-hidden">
+    <!-- Ambient Studio Lighting Flares Background -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-ignition-gold/10 via-nitro-cyan/10 to-transparent blur-[140px] pointer-events-none"></div>
+
+    <div class="container mx-auto px-4 sm:px-6 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- Left Hero Text & CTA (5 cols) -->
+        <div class="lg:col-span-5 space-y-6 text-left">
+            <div class="hero-anim inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-sans font-semibold text-ignition-gold tracking-widest uppercase">
+                <span class="w-2 h-2 rounded-full bg-ignition-gold animate-pulse"></span>
+                Bespoke Automotive Engineering
+            </div>
+
+            <h1 class="hero-anim text-4xl sm:text-5xl lg:text-6xl font-display font-extrabold tracking-tight leading-[1.12] text-pearl">
+                Crafted for precision.<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-ignition-gold via-ignition-gold-light to-amber-200">Engineered to inspire.</span>
+            </h1>
+
+            <p class="hero-anim text-base sm:text-lg text-steel-grey max-w-lg leading-relaxed font-sans">
+                Experience meticulous composite styling, master-grade paint correction, and aerospace ceramic protection. Every vehicle undergoes rigorous craftsmanship in our dedicated studio bays.
+            </p>
+
+            <!-- CTA Buttons -->
+            <div class="hero-anim flex flex-wrap gap-4 pt-2">
+                <a href="{% url 'accounts:login' %}?role=customer" class="btn-primary flex items-center gap-2 group">
+                    <span>Look Up Vehicle Passport</span>
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </a>
+                
+                <a href="#services" class="btn-secondary flex items-center gap-2">
+                    <span>Explore Disciplines</span>
+                </a>
+            </div>
+
+            <!-- Quick Studio Badges -->
+            <div class="hero-anim pt-4 grid grid-cols-3 gap-3 border-t border-white/10 max-w-md">
+                <div class="glass-panel p-3.5 rounded-xl text-center">
+                    <div class="font-display text-sm text-ignition-gold font-bold">STAGE 3</div>
+                    <div class="text-[11px] text-steel-grey font-medium mt-0.5">Ceramic Shield</div>
+                </div>
+                <div class="glass-panel p-3.5 rounded-xl text-center">
+                    <div class="font-display text-sm text-nitro-cyan font-bold">100%</div>
+                    <div class="text-[11px] text-steel-grey font-medium mt-0.5">Surface Depth</div>
+                </div>
+                <div class="glass-panel p-3.5 rounded-xl text-center">
+                    <div class="font-display text-sm text-white font-bold">6 BAYS</div>
+                    <div class="text-[11px] text-steel-grey font-medium mt-0.5">Active Detailing</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right 3D Car Visualizer Canvas (7 cols) -->
+        <div class="lg:col-span-7 relative flex flex-col items-center">
+            
+            <!-- 3D Viewport Frame -->
+            <div class="w-full relative glass-panel rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-gradient-to-b from-[#0F1116] to-[#08090B]">
+                
+                <!-- HUD Top Bar -->
+                <div class="absolute top-0 left-0 right-0 p-4 z-20 flex justify-between items-center pointer-events-none">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-ignition-gold animate-ping"></span>
+                        <span class="font-sans text-xs text-pearl tracking-wider font-semibold">3D STUDIO MODEL · 360° INTERACTIVE</span>
+                    </div>
+                    <div class="text-[10px] font-sans text-steel-grey tracking-wider bg-white/5 px-2.5 py-1 rounded border border-white/10">
+                        DRAG TO ROTATE
+                    </div>
+                </div>
+
+                <!-- 3D Canvas Container -->
+                <div id="hero-3d-car-container" class="w-full h-[380px] sm:h-[460px] cursor-grab active:cursor-grabbing"></div>
+
+                <!-- HUD Bottom Controls: Paint Colors & View Controls -->
+                <div class="p-4 border-t border-white/10 bg-[#0E1015]/90 backdrop-blur-md flex flex-wrap items-center justify-between gap-4 z-20 relative">
+                    
+                    <!-- Color Swatches -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-sans text-steel-grey mr-1 uppercase font-semibold">Finish:</span>
+                        <button data-car-color="#D4AF37" title="Ignition Gold" class="w-6 h-6 rounded-full bg-[#D4AF37] ring-2 ring-white scale-110 shadow-md transition-all hover:scale-125 cursor-pointer"></button>
+                        <button data-car-color="#00F0FF" title="Cyber Cyan" class="w-6 h-6 rounded-full bg-[#00F0FF] shadow-md transition-all hover:scale-125 cursor-pointer"></button>
+                        <button data-car-color="#14171F" title="Obsidian Carbon" class="w-6 h-6 rounded-full bg-[#14171F] border border-white/20 shadow-md transition-all hover:scale-125 cursor-pointer"></button>
+                        <button data-car-color="#DC2626" title="Rosso Corsa" class="w-6 h-6 rounded-full bg-[#DC2626] shadow-md transition-all hover:scale-125 cursor-pointer"></button>
+                        <button data-car-color="#E2E8F0" title="Pearl Titanium" class="w-6 h-6 rounded-full bg-[#E2E8F0] shadow-md transition-all hover:scale-125 cursor-pointer"></button>
+                    </div>
+
+                    <!-- Mod Toggles -->
+                    <div class="flex items-center gap-2 text-xs">
+                        <button id="toggle-headlights" class="px-3 py-1 rounded-lg bg-white/5 border border-nitro-cyan text-nitro-cyan hover:bg-white/10 font-sans font-medium transition-all cursor-pointer">
+                            Headlights
+                        </button>
+                        <button id="toggle-underglow" class="px-3 py-1 rounded-lg bg-white/5 border border-nitro-cyan text-nitro-cyan hover:bg-white/10 font-sans font-medium transition-all cursor-pointer">
+                            Neon Glow
+                        </button>
+                        <button id="toggle-wireframe" class="px-3 py-1 rounded-lg bg-white/5 border border-white/15 text-steel-grey hover:bg-white/10 font-sans font-medium transition-all cursor-pointer">
+                            Wireframe
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- PERFORMANCE STATS COUNTERS -->
+<section class="py-12 border-y border-white/10 bg-obsidian-card relative z-10">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+            <div class="p-4">
+                <div class="text-3xl sm:text-5xl font-display font-extrabold text-ignition-gold mb-1 stat-counter" data-target="450">450</div>
+                <div class="text-xs sm:text-sm font-semibold text-steel-grey uppercase tracking-wider">Vehicles Perfected</div>
+            </div>
+            <div class="p-4">
+                <div class="text-3xl sm:text-5xl font-display font-extrabold text-nitro-cyan mb-1 stat-counter" data-target="100">100</div>
+                <div class="text-xs sm:text-sm font-semibold text-steel-grey uppercase tracking-wider">% Client Satisfaction</div>
+            </div>
+            <div class="p-4">
+                <div class="text-3xl sm:text-5xl font-display font-extrabold text-pearl mb-1 stat-counter" data-target="6">6</div>
+                <div class="text-xs sm:text-sm font-semibold text-steel-grey uppercase tracking-wider">Dedicated Detailing Bays</div>
+            </div>
+            <div class="p-4">
+                <div class="text-3xl sm:text-5xl font-display font-extrabold text-signal-emerald mb-1 stat-counter" data-target="9">9</div>
+                <div class="text-xs sm:text-sm font-semibold text-steel-grey uppercase tracking-wider">H Aerospace Hardness</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STUDIO SERVICES SHOWCASE -->
+<section id="services" class="py-24 relative z-10 bg-obsidian">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="max-w-3xl mb-16">
+            <span class="text-xs font-sans font-semibold text-ignition-gold tracking-widest uppercase mb-2 block">Our Disciplines</span>
+            <h2 class="text-3xl sm:text-5xl font-display font-bold text-pearl mb-6">Excellence in every millimeter.</h2>
+            <p class="text-steel-grey text-base sm:text-lg leading-relaxed">
+                From multi-stage optical paint correction to bespoke carbon aerodynamics and encrypted digital twin reporting, our craftsmanship meets highest international standards.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Service 1 -->
+            <div class="service-card glass-panel rounded-2xl p-8 hover:-translate-y-2 hover:border-ignition-gold/50 transition-all duration-300 relative group overflow-hidden">
+                <div class="w-12 h-12 rounded-xl bg-ignition-gold/10 border border-ignition-gold/30 flex items-center justify-center text-ignition-gold mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                </div>
+                <h3 class="text-2xl font-display font-bold text-pearl mb-3 group-hover:text-ignition-gold transition-colors">Stage 1: Multi-Stage Paint Correction</h3>
+                <p class="text-steel-grey text-sm leading-relaxed mb-4">
+                    Eliminates swirl marks, microscopic scratches, and surface imperfections under calibrated studio lighting to achieve mirror-depth reflection.
+                </p>
+                <div class="text-xs font-sans font-semibold text-ignition-gold">TOLERANCE: &lt; 0.5 MICRONS · FLAWLESS GLOSS RESTORATION</div>
+            </div>
+
+            <!-- Service 2 -->
+            <div class="service-card glass-panel rounded-2xl p-8 hover:-translate-y-2 hover:border-nitro-cyan/50 transition-all duration-300 relative group overflow-hidden">
+                <div class="w-12 h-12 rounded-xl bg-nitro-cyan/10 border border-nitro-cyan/30 flex items-center justify-center text-nitro-cyan mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01"></path></svg>
+                </div>
+                <h3 class="text-2xl font-display font-bold text-pearl mb-3 group-hover:text-nitro-cyan transition-colors">Stage 2: Ceramic & Graphene Coating</h3>
+                <p class="text-steel-grey text-sm leading-relaxed mb-4">
+                    Nanotechnology matrix provides extreme hydrophobic water contact angle, UV barrier protection, and defense against harsh atmospheric fallout.
+                </p>
+                <div class="text-xs font-sans font-semibold text-nitro-cyan">CERTIFIED 9H COATING MATRIX · MULTI-YEAR DURABILITY</div>
+            </div>
+
+            <!-- Service 3 -->
+            <div class="service-card glass-panel rounded-2xl p-8 hover:-translate-y-2 hover:border-ignition-gold/50 transition-all duration-300 relative group overflow-hidden">
+                <div class="w-12 h-12 rounded-xl bg-ignition-gold/10 border border-ignition-gold/30 flex items-center justify-center text-ignition-gold mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+                </div>
+                <h3 class="text-2xl font-display font-bold text-pearl mb-3 group-hover:text-ignition-gold transition-colors">Stage 3: Carbon Aerodynamics & Styling</h3>
+                <p class="text-steel-grey text-sm leading-relaxed mb-4">
+                    Pre-preg carbon splitters, side sills, rear diffusers, and brake caliper refinishing installed with millimeter precision.
+                </p>
+                <div class="text-xs font-sans font-semibold text-ignition-gold">BESPOKE FITMENT · OE SPECIFICATION STANDARDS</div>
+            </div>
+
+            <!-- Service 4 -->
+            <div class="service-card glass-panel rounded-2xl p-8 hover:-translate-y-2 hover:border-signal-emerald/50 transition-all duration-300 relative group overflow-hidden">
+                <div class="w-12 h-12 rounded-xl bg-signal-emerald/10 border border-signal-emerald/30 flex items-center justify-center text-signal-emerald mb-6 group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                </div>
+                <h3 class="text-2xl font-display font-bold text-pearl mb-3 group-hover:text-signal-emerald transition-colors">Stage 4: Secure Digital Twin Passport</h3>
+                <p class="text-steel-grey text-sm leading-relaxed mb-4">
+                    Private authenticated portal tracking your car’s service progression, installed components, before/after photography, and warranty records.
+                </p>
+                <div class="text-xs font-sans font-semibold text-signal-emerald">AUTHENTICATED DIGITAL RECORD · ZERO APP DOWNLOADS</div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- INTERACTIVE BEFORE & AFTER SLIDER SECTION -->
+<section id="transformation" class="py-24 border-t border-white/10 bg-obsidian-card relative z-10">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center max-w-2xl mx-auto mb-16">
+            <span class="text-xs font-sans font-semibold text-ignition-gold tracking-widest uppercase mb-2 block">Visible Transformation</span>
+            <h2 class="text-3xl sm:text-5xl font-display font-bold text-pearl mb-4">Precision Before & After</h2>
+            <p class="text-steel-grey text-base">Drag the interactive slider below to inspect intake condition versus finished studio surface reflection.</p>
+        </div>
+
+        <div class="max-w-4xl mx-auto">
+            <div class="relative aspect-[16/9] rounded-2xl overflow-hidden glass-panel border border-white/15 select-none shadow-2xl cursor-ew-resize" id="landing-ba-container">
+                
+                <!-- After Image (Base) -->
+                <div class="absolute inset-0 w-full h-full">
+                    <img src="/static/images/ai-generated/cars/sportscar-after.png" alt="Studio Finished Car" class="w-full h-full object-cover pointer-events-none">
+                    <span class="absolute bottom-6 right-6 px-3.5 py-1.5 rounded-lg bg-black/80 backdrop-blur-md border border-signal-emerald/60 text-signal-emerald text-xs font-sans font-semibold tracking-wide uppercase">
+                        AFTER: CERAMIC FINISH
+                    </span>
+                </div>
+
+                <!-- Before Image (Clipped) -->
+                <div id="landing-ba-before" class="absolute inset-0 h-full overflow-hidden border-r-2 border-ignition-gold shadow-[2px_0_15px_rgba(212,175,55,0.6)]" style="width: 50%;">
+                    <div id="landing-ba-inner" class="absolute inset-0 h-full">
+                        <img src="/static/images/ai-generated/cars/sportscar-before.png" alt="Raw Intake Car" class="w-full h-full object-cover pointer-events-none">
+                        <span class="absolute bottom-6 left-6 px-3.5 py-1.5 rounded-lg bg-black/80 backdrop-blur-md border border-white/30 text-steel-grey text-xs font-sans font-semibold tracking-wide uppercase">
+                            BEFORE: RAW INTAKE
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Draggable Handle -->
+                <div id="landing-ba-handle" class="absolute inset-y-0 left-1/2 w-0.5 bg-ignition-gold flex items-center justify-center -ml-0.5" style="left: 50%;">
+                    <div class="w-10 h-10 rounded-full bg-obsidian border-2 border-ignition-gold shadow-[0_0_15px_rgba(212,175,55,0.7)] flex items-center justify-center text-ignition-gold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 9l-3 3 3 3m8-6l3 3-3 3"></path></svg>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STUDIO FACILITY BAYS OVERVIEW (NO PUBLIC CARS LISTED) -->
+<section id="bays" class="py-24 relative z-10 bg-obsidian">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+            <div>
+                <span class="text-xs font-sans font-semibold text-ignition-gold tracking-widest uppercase mb-2 block">Studio Infrastructure</span>
+                <h2 class="text-3xl sm:text-5xl font-display font-bold text-pearl">Precision Detailing Bays</h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="w-2.5 h-2.5 rounded-full bg-signal-emerald animate-ping"></span>
+                <span class="text-xs font-sans text-signal-emerald tracking-wider font-semibold uppercase">Facility Online · Monitored Environment</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- Bay 1 -->
+            <div class="glass-panel rounded-2xl p-7 border border-white/10 hover:border-ignition-gold/50 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-sans font-semibold px-3 py-1 rounded-md bg-white/5 border border-white/10 text-ignition-gold">
+                            Bay Alpha
+                        </span>
+                        <span class="text-xs font-sans font-semibold px-3 py-1 rounded-md bg-signal-emerald/20 text-signal-emerald border border-signal-emerald/30">
+                            Operational
+                        </span>
+                    </div>
+
+                    <div class="aspect-video w-full rounded-xl overflow-hidden bg-black/40 mb-5 border border-white/5 relative">
+                        <img src="/static/images/ai-generated/bays/bay-wide.png" alt="Bay Alpha" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-3 left-3 text-xs font-sans font-semibold text-white">Surface Correction & Preparation</div>
+                    </div>
+
+                    <h3 class="text-xl font-display font-bold text-pearl mb-2">Stage 1 Optical Lab</h3>
+                    <p class="text-xs text-steel-grey leading-relaxed">
+                        Equipped with high-CRI LED multi-spectrum inspection arrays, precision paint depth gauges, and dust-controlled air extraction.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bay 2 -->
+            <div class="glass-panel rounded-2xl p-7 border border-white/10 hover:border-ignition-gold/50 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-sans font-semibold px-3 py-1 rounded-md bg-white/5 border border-white/10 text-ignition-gold">
+                            Bay Bravo
+                        </span>
+                        <span class="text-xs font-sans font-semibold px-3 py-1 rounded-md bg-signal-emerald/20 text-signal-emerald border border-signal-emerald/30">
+                            Operational
+                        </span>
+                    </div>
+
+                    <div class="aspect-video w-full rounded-xl overflow-hidden bg-black/40 mb-5 border border-white/5 relative">
+                        <img src="/static/images/ai-generated/bays/bay-wide.png" alt="Bay Bravo" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-3 left-3 text-xs font-sans font-semibold text-white">Ceramic & Protective Chamber</div>
+                    </div>
+
+                    <h3 class="text-xl font-display font-bold text-pearl mb-2">Clean Room Application</h3>
+                    <p class="text-xs text-steel-grey leading-relaxed">
+                        Climate-regulated chamber maintaining 21°C and 45% relative humidity for optimal nano-ceramic and graphene curing.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bay 3 -->
+            <div class="glass-panel rounded-2xl p-7 border border-white/10 hover:border-ignition-gold/50 transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-sans font-semibold px-3 py-1 rounded-md bg-white/5 border border-white/10 text-ignition-gold">
+                            Bay Charlie
+                        </span>
+                        <span class="text-xs font-sans font-semibold px-3 py-1 rounded-md bg-signal-emerald/20 text-signal-emerald border border-signal-emerald/30">
+                            Operational
+                        </span>
+                    </div>
+
+                    <div class="aspect-video w-full rounded-xl overflow-hidden bg-black/40 mb-5 border border-white/5 relative">
+                        <img src="/static/images/ai-generated/bays/bay-wide.png" alt="Bay Charlie" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-3 left-3 text-xs font-sans font-semibold text-white">Aero Assembly & Handover</div>
+                    </div>
+
+                    <h3 class="text-xl font-display font-bold text-pearl mb-2">Composite Fitment Lab</h3>
+                    <p class="text-xs text-steel-grey leading-relaxed">
+                        Hydraulic platform for carbon fiber splitter, diffuser, and spoiler fitment with calibrated torque settings and final audit.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-12 text-center">
+            <p class="text-xs font-sans text-steel-grey">
+                Are you an existing client? Look up your vehicle with your license plate or pass token in the 
+                <a href="{% url 'accounts:login' %}?role=customer" class="text-ignition-gold hover:underline font-semibold">Client Portal &rarr;</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-16 border-t border-white/10 bg-[#060709] relative z-10">
+    <div class="container mx-auto px-4 sm:px-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+            
+            <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E5C358] via-ignition-gold to-[#8B6D1E] p-0.5">
+                        <div class="w-full h-full bg-[#08090B] rounded-[10px] flex items-center justify-center">
+                            <svg class="w-4 h-4 text-ignition-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <span class="font-display font-black text-xl tracking-[0.18em] text-pearl">GENESIS</span>
+                </div>
+                <p class="text-sm text-steel-grey leading-relaxed font-sans">
+                    Bespoke automotive modification and detailing studio. Setting the standard in paint restoration, composite aerodynamics, and transparent vehicle records.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-sans font-semibold text-pearl uppercase tracking-wider mb-4">Disciplines</h4>
+                <ul class="space-y-2 text-sm text-steel-grey font-sans">
+                    <li><a href="#services" class="hover:text-ignition-gold transition-colors">Stage 1 Paint Correction</a></li>
+                    <li><a href="#services" class="hover:text-ignition-gold transition-colors">9H Ceramic & Graphene Coating</a></li>
+                    <li><a href="#services" class="hover:text-ignition-gold transition-colors">Carbon Aero Upgrades</a></li>
+                    <li><a href="#services" class="hover:text-ignition-gold transition-colors">Digital Twin Passport</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-sans font-semibold text-pearl uppercase tracking-wider mb-4">Studio Facility</h4>
+                <p class="text-sm text-steel-grey leading-relaxed font-sans">
+                    Genesis Performance Studio<br>
+                    Monday – Saturday: 08:00 – 19:00<br>
+                    Direct Inquiries: +1 (555) 019-2831<br>
+                    Email: studio@genesis.local
+                </p>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-sans font-semibold text-pearl uppercase tracking-wider mb-4">Client & Personnel</h4>
+                <p class="text-xs text-steel-grey mb-4 font-sans leading-relaxed">
+                    Check vehicle status, view digital passports, or access staff management:
+                </p>
+                <a href="{% url 'accounts:login' %}" class="btn-secondary w-full text-center text-xs font-sans font-semibold tracking-wider">
+                    Studio Portal Login &rarr;
+                </a>
+            </div>
+
+        </div>
+
+        <div class="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center text-xs text-steel-grey font-sans">
+            <div>&copy; 2026 Genesis Automation Studio. All rights reserved.</div>
+            <div class="flex gap-6 mt-4 sm:mt-0">
+                <a href="#services" class="hover:text-pearl transition-colors">Services</a>
+                <a href="#customizer" class="hover:text-pearl transition-colors">3D Studio</a>
+                <a href="{% url 'accounts:login' %}" class="hover:text-pearl transition-colors">Staff Login</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+{% endblock %}
+

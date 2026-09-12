@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Genesis Portal Access — Reception, Owner & Customer{% endblock %}
+
+{% block body_class %}bg-[#08090B] text-pearl{% endblock %}
+
+{% block extra_head %}
+<script>
+    function switchTab(role) {
+        // Hide all panels
+        document.querySelectorAll('.login-panel').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('bg-ignition-gold', 'text-obsidian', 'shadow-gold-glow', 'border-ignition-gold');
+            b.classList.add('bg-white/5', 'text-steel-grey', 'border-white/10');
+        });
+
+        // Show active panel & highlight button
+        const targetPanel = document.getElementById(`panel-${role}`);
+        const targetBtn = document.getElementById(`tab-btn-${role}`);
+        
+        if (targetPanel) targetPanel.classList.remove('hidden');
+        if (targetBtn) {
+            targetBtn.classList.remove('bg-white/5', 'text-steel-grey', 'border-white/10');
+            targetBtn.classList.add('bg-ignition-gold', 'text-obsidian', 'shadow-gold-glow', 'border-ignition-gold');
+        }
+    }
+
+    function autofillDemo(username, password) {
+        const userInputs = document.querySelectorAll('input[name="username"]');
+        const passInputs = document.querySelectorAll('input[name="password"]');
+        
+        userInputs.forEach(input => input.value = username);
+        passInputs.forEach(input => input.value = password);
+        
+        if (window.showStudioToast) {
+            window.showStudioToast(`Demo credentials applied: ${username}`, 'info');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Default to receptionist or query param
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role') || 'receptionist';
+        switchTab(role);
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col justify-between bg-[#08090B] relative overflow-hidden">
+    
+    <!-- Ambient Neon Flares Background -->
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-tr from-ignition-gold/10 via-nitro-cyan/10 to-transparent blur-[160px] pointer-events-none"></div>
+
+    <!-- Top Navigation Bar with Backtracking -->
+    <header class="p-6 relative z-20 flex items-center justify-between">
+        <a href="/" data-backtrack="true" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium text-steel-grey hover:text-white transition-all group">
+            <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform text-ignition-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <span>Back to Studio</span>
+        </a>
+
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-signal-emerald animate-pulse"></span>
+            <span class="text-xs font-mono text-signal-emerald tracking-wider font-bold">SECURE PORTAL MATRIX</span>
+        </div>
+    </header>
+
+    <!-- Center Stage Container -->
+    <div class="flex-1 flex items-center justify-center px-4 py-8 relative z-10">
+        <div class="w-full max-w-xl">
+            
+            <!-- Branding Header -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-[#E5C358] via-ignition-gold to-[#8B6D1E] p-0.5 mb-4 shadow-[0_0_20px_rgba(212,175,55,0.4)]">
+                    <div class="w-full h-full bg-[#08090B] rounded-[14px] flex items-center justify-center">
+                        <svg class="w-6 h-6 text-ignition-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-display font-extrabold text-pearl tracking-tight">
+                    Genesis Studio Portals
+                </h1>
+                <p class="text-steel-grey text-sm mt-2">
+                    Select your portal role to access studio records and telemetry.
+                </p>
+            </div>
+
+            <!-- 3-WAY ROLE SWITCHER TABS -->
+            <div class="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-obsidian-card border border-white/10 mb-8 shadow-2xl">
+                
+                <!-- Tab 1: Receptionist -->
+                <button type="button" id="tab-btn-receptionist" onclick="switchTab('receptionist')" class="tab-btn py-3 px-2 rounded-xl text-xs sm:text-sm font-display font-bold border transition-all flex flex-col items-center gap-1 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    <span>Receptionist</span>
+                </button>
+
+                <!-- Tab 2: Owner / Admin -->
+                <button type="button" id="tab-btn-owner" onclick="switchTab('owner')" class="tab-btn py-3 px-2 rounded-xl text-xs sm:text-sm font-display font-bold border transition-all flex flex-col items-center gap-1 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span>Owner / Admin</span>
+                </button>
+
+                <!-- Tab 3: Customer Passport -->
+                <button type="button" id="tab-btn-customer" onclick="switchTab('customer')" class="tab-btn py-3 px-2 rounded-xl text-xs sm:text-sm font-display font-bold border transition-all flex flex-col items-center gap-1 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                    <span>Client Passport</span>
+                </button>
+
+            </div>
+
+            <!-- Error Notifications -->
+            {% if form.errors %}
+            <div class="mb-6 p-4 rounded-xl bg-[#1F0F12] border border-[#EF4444]/40 text-[#EF4444] text-sm flex items-center gap-3">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>Invalid credentials entered. Please verify your credentials and try again.</span>
+            </div>
+            {% endif %}
+
+            <!-- PANEL 1: RECEPTIONIST LOGIN -->
+            <div id="panel-receptionist" class="login-panel glass-panel p-8 rounded-2xl border border-white/10 shadow-2xl relative">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                    <div>
+                        <h2 class="text-xl font-display font-bold text-pearl">Receptionist Portal</h2>
+                        <p class="text-xs text-steel-grey">Vehicle intake, bay assignments, and customer updates.</p>
+                    </div>
+                    <button type="button" onclick="autofillDemo('reception', 'reception123')" class="text-xs font-sans font-semibold px-3 py-1.5 rounded-lg bg-ignition-gold/10 hover:bg-ignition-gold/20 border border-ignition-gold/30 text-ignition-gold transition-all cursor-pointer">
+                        Fill Demo
+                    </button>
+                </div>
+
+                <form method="post" action="{% url 'accounts:login' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-xs font-sans font-semibold text-steel-grey uppercase tracking-wider mb-2">Username</label>
+                        <input type="text" name="username" value="reception" required class="w-full bg-[#14171F] border border-white/10 rounded-xl px-4 py-3 text-sm text-pearl focus:outline-none focus:border-ignition-gold focus:ring-1 focus:ring-ignition-gold transition-all" placeholder="Username">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-sans font-semibold text-steel-grey uppercase tracking-wider mb-2">Password</label>
+                        <input type="password" name="password" value="reception123" required class="w-full bg-[#14171F] border border-white/10 rounded-xl px-4 py-3 text-sm text-pearl focus:outline-none focus:border-ignition-gold focus:ring-1 focus:ring-ignition-gold transition-all" placeholder="••••••••">
+                    </div>
+
+                    <button type="submit" class="w-full btn-primary mt-6 text-sm flex items-center justify-center gap-2 cursor-pointer">
+                        <span>Sign In to Reception Desk</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- PANEL 2: OWNER / ADMIN LOGIN -->
+            <div id="panel-owner" class="login-panel hidden glass-panel p-8 rounded-2xl border border-white/10 shadow-2xl relative">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                    <div>
+                        <h2 class="text-xl font-display font-bold text-pearl">Owner Command Hub</h2>
+                        <p class="text-xs text-steel-grey">Studio analytics, technician roster, and operations pipeline.</p>
+                    </div>
+                    <button type="button" onclick="autofillDemo('admin', 'admin123')" class="text-xs font-sans font-semibold px-3 py-1.5 rounded-lg bg-ignition-gold/10 hover:bg-ignition-gold/20 border border-ignition-gold/30 text-ignition-gold transition-all cursor-pointer">
+                        Fill Demo
+                    </button>
+                </div>
+
+                <form method="post" action="{% url 'accounts:login' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-xs font-sans font-semibold text-steel-grey uppercase tracking-wider mb-2">Administrator Username</label>
+                        <input type="text" name="username" value="admin" required class="w-full bg-[#14171F] border border-white/10 rounded-xl px-4 py-3 text-sm text-pearl focus:outline-none focus:border-ignition-gold focus:ring-1 focus:ring-ignition-gold transition-all" placeholder="admin">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-sans font-semibold text-steel-grey uppercase tracking-wider mb-2">Security Key</label>
+                        <input type="password" name="password" value="admin123" required class="w-full bg-[#14171F] border border-white/10 rounded-xl px-4 py-3 text-sm text-pearl focus:outline-none focus:border-ignition-gold focus:ring-1 focus:ring-ignition-gold transition-all" placeholder="••••••••">
+                    </div>
+
+                    <button type="submit" class="w-full btn-primary mt-6 text-sm flex items-center justify-center gap-2 cursor-pointer">
+                        <span>Authenticate Administrator</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- PANEL 3: CUSTOMER DIGITAL PASSPORT LOOKUP -->
+            <div id="panel-customer" class="login-panel hidden glass-panel p-8 rounded-2xl border border-white/10 shadow-2xl relative">
+                <div class="mb-6 pb-4 border-b border-white/10">
+                    <h2 class="text-xl font-display font-bold text-pearl">Client Digital Passport Lookup</h2>
+                    <p class="text-xs text-steel-grey">Enter your vehicle's registered license plate number or secure digital token to open your record.</p>
+                </div>
+
+                <form method="post" action="{% url 'accounts:customer_lookup' %}" class="space-y-4 mb-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-xs font-sans font-semibold text-steel-grey uppercase tracking-wider mb-2">License Plate Number or Pass Token</label>
+                        <div class="relative">
+                            <input type="text" name="identifier" required class="w-full bg-[#14171F] border border-white/10 rounded-xl px-4 py-3 text-sm text-pearl uppercase font-mono tracking-widest focus:outline-none focus:border-ignition-gold focus:ring-1 focus:ring-ignition-gold transition-all" placeholder="ENTER PLATE NUMBER (E.G. RCI-777)">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full btn-primary text-sm flex items-center justify-center gap-2 cursor-pointer">
+                        <span>Access Vehicle Passport</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </button>
+                </form>
+
+                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-steel-grey leading-relaxed">
+                    <p class="font-semibold text-pearl mb-1">Privacy & Verification Notice</p>
+                    Passports contain authenticated service history, before/after condition photography, and ceramic warranty logs. Access is granted solely with valid credentials provided at vehicle intake.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bottom Footer -->
+    <footer class="p-6 text-center text-xs text-steel-grey font-sans relative z-20">
+        Genesis Automation Studio &copy; 2026 · Confidential & Authorized Access
+    </footer>
+
+</div>
+{% endblock %}
+

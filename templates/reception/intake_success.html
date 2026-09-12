@@ -1,0 +1,91 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Intake Confirmed — {{ car.make }} {{ car.model }} | Genesis Automation{% endblock %}
+
+{% block main_content %}
+<div class="max-w-2xl mx-auto mt-8 sm:mt-12 space-y-6">
+    <!-- Backtracking breadcrumb -->
+    <div class="flex items-center gap-3">
+        <button onclick="window.backtrackOrFallback('{% url 'reception:home' %}')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 hover:text-white transition-all">
+            <svg class="w-3.5 h-3.5 text-ignition-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            <span>Back to Reception</span>
+        </button>
+        <span class="text-slate-600 font-mono text-xs">/</span>
+        <span class="text-xs font-mono text-slate-400">Intake Confirmation</span>
+    </div>
+
+    <!-- Confirmation Card -->
+    <div class="rounded-3xl border border-white/10 bg-gradient-to-b from-carbon to-obsidian p-8 sm:p-10 shadow-2xl text-center relative overflow-hidden">
+        <!-- Glow accents -->
+        <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-signal-emerald/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Success Emblem -->
+        <div class="w-20 h-20 bg-signal-emerald/10 border border-signal-emerald/30 text-signal-emerald rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-signal-emerald/10 border border-signal-emerald/30 text-signal-emerald font-mono text-xs uppercase tracking-widest font-bold mb-3">
+            Intake Successfully Logged
+        </div>
+
+        <h1 class="text-2xl sm:text-4xl font-display font-black text-white uppercase tracking-tight mb-3">
+            {{ car.make }} <span class="text-ignition-gold">{{ car.model }}</span>
+        </h1>
+        <p class="text-sm font-mono text-slate-400 max-w-md mx-auto mb-8">
+            Digital Twin generated for customer <span class="text-white font-bold">{{ car.customer.full_name }}</span>. Vehicle assigned to studio intake queue.
+        </p>
+        
+        <!-- Passport Link Box -->
+        <div class="bg-black/60 border border-white/10 rounded-2xl p-6 mb-8 text-left backdrop-blur-sm">
+            <div class="flex items-center justify-between mb-3">
+                <label class="block text-xs font-mono font-bold uppercase tracking-widest text-ignition-gold">Customer Digital Passport Link</label>
+                <span class="text-[10px] font-mono text-slate-500">Public No-Auth URL</span>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input type="text" readonly value="{{ request.scheme }}://{{ request.get_host }}/car/{{ car.secure_token }}/" class="w-full bg-obsidian border border-white/15 rounded-xl px-4 py-3 text-xs sm:text-sm focus:outline-none focus:border-ignition-gold font-mono text-slate-200" id="tokenLink">
+                <button onclick="copyPassportLink()" id="copyBtn" class="px-5 py-3 bg-white/10 hover:bg-ignition-gold hover:text-obsidian text-white text-xs font-mono font-bold rounded-xl transition-all whitespace-nowrap border border-white/15 cursor-pointer">
+                    Copy Link
+                </button>
+            </div>
+            <p class="text-[11px] font-mono text-slate-500 mt-3">
+                Share this secure URL with the customer. They can monitor stage progression and inspect their 3D digital passport directly from any mobile device.
+            </p>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{% url 'reception:home' %}" class="px-6 py-3 rounded-xl font-mono text-xs font-bold text-slate-300 hover:text-white border border-white/10 hover:bg-white/5 transition-all text-center">
+                Return to Reception
+            </a>
+            <a href="/car/{{ car.secure_token }}/" target="_blank" class="px-6 py-3 rounded-xl font-mono text-xs font-bold text-slate-300 hover:text-ignition-gold border border-white/10 hover:bg-white/5 transition-all text-center flex items-center justify-center gap-2">
+                <span>Preview Passport</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+            <a href="{% url 'reception:car_detail' car.id %}" class="px-6 py-3 bg-gradient-to-r from-ignition-gold to-amber-500 text-obsidian font-mono text-xs font-black rounded-xl hover:brightness-110 shadow-lg shadow-ignition-gold/20 transition-all text-center">
+                Manage Vehicle
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyPassportLink() {
+    const copyText = document.getElementById("tokenLink");
+    const copyBtn = document.getElementById("copyBtn");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    
+    copyBtn.innerText = "Copied ✓";
+    copyBtn.classList.add("bg-signal-emerald", "text-white", "border-signal-emerald");
+    if (window.showGenesisToast) {
+        window.showGenesisToast("Passport URL copied to clipboard", "success");
+    }
+    setTimeout(() => {
+        copyBtn.innerText = "Copy Link";
+        copyBtn.classList.remove("bg-signal-emerald", "text-white", "border-signal-emerald");
+    }, 2500);
+}
+</script>
+{% endblock %}

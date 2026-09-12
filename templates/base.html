@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Genesis Automation — Bespoke Car Modification Studio{% endblock %}</title>
+    
+    <!-- Fonts: Outfit (Prestigious Luxury Automotive) & Plus Jakarta Sans (Clean Modern Geometric Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Design Tokens & CSS -->
+    <link href="/static/css/tokens.css" rel="stylesheet">
+    <link href="/static/css/output.css" rel="stylesheet">
+    
+    <!-- Tailwind CDN with Extended Studio Theme Configuration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#08090B',
+                        'obsidian-card': '#0F1116',
+                        'obsidian-elevated': '#161922',
+                        graphite: '#1A1D24',
+                        'graphite-light': '#252A34',
+                        'ignition-gold': '#D4AF37',
+                        'ignition-gold-light': '#F3C642',
+                        'nitro-cyan': '#00F0FF',
+                        'signal-emerald': '#10B981',
+                        'signal-amber': '#F59E0B',
+                        'signal-crimson': '#EF4444',
+                        platinum: '#C9CDD3',
+                        pearl: '#F4F5F7',
+                        'chrome-silver': '#252A34',
+                        'steel-grey': '#94A3B8',
+                        'showroom-white': '#0E1015',
+                        'graphite-black': '#F4F5F7',
+                    },
+                    fontFamily: {
+                        display: ['Outfit', 'sans-serif'],
+                        tech: ['Outfit', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+                    },
+                    boxShadow: {
+                        'gold-glow': '0 0 25px rgba(212, 175, 55, 0.35)',
+                        'nitro-glow': '0 0 25px rgba(0, 240, 255, 0.45)',
+                        'card-dark': '0 10px 30px -10px rgba(0, 0, 0, 0.8)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP 3 & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <!-- Interactive Car Cursor & Nitro Page Transitions -->
+    <script src="/static/js/nitro-loader.js"></script>
+    <script src="/static/js/cursor.js"></script>
+
+    <style>
+        /* Base typography defaults */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #08090B;
+            color: #F4F5F7;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        .font-display { font-family: 'Outfit', sans-serif; }
+        .font-tech { font-family: 'Outfit', sans-serif; letter-spacing: 0.05em; }
+        
+        /* Smooth Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #08090B; }
+        ::-webkit-scrollbar-thumb { background: #252A34; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+
+        .glass-panel {
+            background: rgba(15, 17, 22, 0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-obsidian text-pearl {% block body_class %}{% endblock %} min-h-screen flex flex-col">
+    
+    <!-- Global Toast Container -->
+    <div id="global-toast-container" class="fixed top-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="toast-card pointer-events-auto p-4 rounded-xl text-sm font-bold shadow-2xl border flex items-center gap-3 w-84 transform transition-all duration-300
+                {% if message.tags == 'success' %}bg-[#0F1A15] border-[#10B981]/40 text-[#10B981]
+                {% elif message.tags == 'error' %}bg-[#1F0F12] border-[#EF4444]/40 text-[#EF4444]
+                {% else %}bg-[#161922] border-[#D4AF37]/40 text-[#D4AF37]{% endif %}">
+                <span class="w-2 h-2 rounded-full {% if message.tags == 'success' %}bg-[#10B981]{% elif message.tags == 'error' %}bg-[#EF4444]{% else %}bg-[#D4AF37]{% endif %} animate-ping"></span>
+                <p class="flex-1">{{ message }}</p>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="flex-1 flex flex-col">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Global Backtracking Handler -->
+    <script>
+
+        // Global Backtracking Handler (Supports data-backtrack="true")
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-backtrack]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetUrl = btn.getAttribute('href');
+                    if (window.triggerNitroBoost) {
+                        window.triggerNitroBoost(targetUrl || null, () => {
+                            if (targetUrl && targetUrl !== '#' && !targetUrl.startsWith('javascript')) {
+                                window.location.href = targetUrl;
+                            } else {
+                                window.history.back();
+                            }
+                        });
+                    } else {
+                        if (targetUrl && targetUrl !== '#') window.location.href = targetUrl;
+                        else window.history.back();
+                    }
+                });
+            });
+
+            // Auto dismiss toasts after 4.5 seconds
+            const toasts = document.querySelectorAll('.toast-card');
+            if (toasts.length) {
+                setTimeout(() => {
+                    toasts.forEach(t => {
+                        t.style.opacity = '0';
+                        t.style.transform = 'translateX(50px)';
+                        setTimeout(() => t.remove(), 400);
+                    });
+                }, 4500);
+            }
+        });
+
+        // Global Toast Trigger helper for client-side interactions
+        window.showStudioToast = function(message, type = 'success') {
+            const container = document.getElementById('global-toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast-card pointer-events-auto p-4 rounded-xl text-sm font-bold shadow-2xl border flex items-center gap-3 w-84 transform transition-all duration-300 ${
+                type === 'success' ? 'bg-[#0F1A15] border-[#10B981]/40 text-[#10B981]' : 
+                type === 'error' ? 'bg-[#1F0F12] border-[#EF4444]/40 text-[#EF4444]' : 
+                'bg-[#161922] border-[#D4AF37]/40 text-[#D4AF37]'
+            }`;
+            toast.innerHTML = `
+                <span class="w-2 h-2 rounded-full ${type === 'success' ? 'bg-[#10B981]' : type === 'error' ? 'bg-[#EF4444]' : 'bg-[#D4AF37]'} animate-ping"></span>
+                <p class="flex-1">${message}</p>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(50px)';
+                setTimeout(() => toast.remove(), 400);
+            }, 4500);
+        };
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

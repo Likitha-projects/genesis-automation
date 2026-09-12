@@ -1,0 +1,114 @@
+{% extends "dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Active Studio Cars — Genesis Reception{% endblock %}
+
+{% block main_content %}
+<div class="relative z-10 max-w-7xl mx-auto space-y-8 pb-12">
+    
+    <!-- Hero Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/10">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="w-2 h-2 rounded-full bg-signal-emerald animate-pulse"></span>
+                <span class="text-xs font-mono text-signal-emerald tracking-widest uppercase font-bold">RECEPTION INTAKE MATRIX</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-display font-extrabold text-pearl tracking-tight">
+                Studio Active Cars
+            </h1>
+            <p class="text-steel-grey text-sm mt-1">
+                Manage live customer intakes, update modification stages, and assign precision studio bays.
+            </p>
+        </div>
+
+        <a href="{% url 'reception:intake' %}" class="btn-primary flex items-center gap-2 text-xs font-tech tracking-wider self-start md:self-auto">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span>New Vehicle Intake</span>
+        </a>
+    </div>
+
+    <!-- Active Cars Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {% for car in cars %}
+        <div class="glass-panel rounded-2xl border border-white/10 hover:border-ignition-gold/50 transition-all duration-300 overflow-hidden flex flex-col sm:flex-row group shadow-xl">
+            
+            <!-- Vehicle Intake / Thumbnail Image -->
+            <div class="w-full sm:w-56 h-48 sm:h-auto bg-[#14171F] relative flex-shrink-0 overflow-hidden border-b sm:border-b-0 sm:border-r border-white/10">
+                {% if car.after_photo %}
+                    <img src="{{ car.after_photo.url }}" alt="{{ car.make }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                {% elif car.intake_photo %}
+                    <img src="{{ car.intake_photo.url }}" alt="{{ car.make }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                {% else %}
+                    <img src="/static/images/ai-generated/cars/sportscar-after.png" alt="Car" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                {% endif %}
+
+                <!-- Bay Stamp on Image -->
+                <div class="absolute bottom-2 left-2 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md border border-white/20 text-[11px] font-tech text-ignition-gold">
+                    {{ car.bay.name|default:"NO BAY" }}
+                </div>
+            </div>
+            
+            <!-- Vehicle Specs & Status Details -->
+            <div class="p-6 flex flex-col justify-between flex-1">
+                <div>
+                    <div class="flex items-start justify-between gap-3 mb-2">
+                        <div>
+                            <h3 class="text-xl font-display font-bold text-pearl group-hover:text-ignition-gold transition-colors">
+                                {{ car.make }} {{ car.model }}
+                            </h3>
+                            <p class="text-xs text-steel-grey">{{ car.year }} · {{ car.color }}</p>
+                        </div>
+
+                        <!-- Stage Badge -->
+                        <span class="px-2.5 py-1 text-xs font-bold rounded-lg uppercase tracking-wider
+                            {% if car.current_stage == 'intake' %}bg-white/10 text-steel-grey border border-white/15
+                            {% elif car.current_stage == 'in_progress' %}bg-signal-emerald/20 text-signal-emerald border border-signal-emerald/30
+                            {% elif car.current_stage == 'quality_check' %}bg-signal-amber/20 text-signal-amber border border-signal-amber/30
+                            {% elif car.current_stage == 'ready' %}bg-signal-emerald/20 text-signal-emerald border border-signal-emerald/30
+                            {% endif %}
+                        ">
+                            {{ car.get_current_stage_display }}
+                        </span>
+                    </div>
+
+                    <!-- Plate & Customer -->
+                    <div class="space-y-2 mt-4 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="text-steel-grey font-mono uppercase">Plate:</span>
+                            <span class="font-mono font-bold bg-[#14171F] px-2 py-0.5 rounded border border-white/10 text-pearl">{{ car.plate_number }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-steel-grey">
+                            <svg class="w-3.5 h-3.5 text-ignition-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            <span class="text-pearl font-medium">{{ car.customer.full_name }}</span>
+                            <span>({{ car.customer.phone }})</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Links -->
+                <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                    <a href="{% url 'client_portal:passport' car.secure_token %}" target="_blank" class="text-xs font-mono text-steel-grey hover:text-nitro-cyan flex items-center gap-1 transition-colors" title="Launch Customer Digital Passport">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        <span>Passport</span>
+                    </a>
+
+                    <a href="{% url 'reception:car_detail' car.id %}" class="btn-primary text-xs py-2 px-4 flex items-center gap-1.5">
+                        <span>Manage Vehicle</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+        {% empty %}
+        <div class="col-span-1 lg:col-span-2 py-16 flex flex-col items-center justify-center glass-panel rounded-2xl border-dashed border-white/15">
+            <svg class="w-16 h-16 text-steel-grey/40 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <p class="text-steel-grey text-base mb-4 font-bold">No active vehicles currently in the studio.</p>
+            <a href="{% url 'reception:intake' %}" class="btn-primary text-xs font-tech tracking-wider">Start New Intake</a>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
+
